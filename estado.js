@@ -1,13 +1,13 @@
 window.ROBO = {
- "ultima_rodada_ok": "2026-10-06T09:08:19",
+ "ultima_rodada_ok": "2026-10-06T10:08:47",
  "consolidado": {
   "estoque": {
-   "linhas": 119655,
-   "quando": "2026-10-06T09:08:00"
+   "linhas": 119699,
+   "quando": "2026-10-06T10:08:28"
   },
   "vendas": {
-   "linhas": 187,
-   "quando": "2026-10-06T09:03:27"
+   "linhas": 449,
+   "quando": "2026-10-06T10:03:53"
   }
  },
  "portais": [
@@ -15,43 +15,91 @@ window.ROBO = {
    "portal": "mv107",
    "vendas": {
     "status": "ok",
-    "linhas": 112,
-    "quando": "2026-10-06T09:01:58"
+    "linhas": 248,
+    "quando": "2026-10-06T10:01:48"
    },
    "estoque": {
     "status": "ok",
-    "linhas": 58878,
-    "quando": "2026-10-06T09:05:21"
+    "linhas": 58928,
+    "quando": "2026-10-06T10:05:48"
    }
   },
   {
    "portal": "mv449",
    "vendas": {
     "status": "ok",
-    "linhas": null,
-    "quando": "2026-10-06T09:02:39"
+    "linhas": 50,
+    "quando": "2026-10-06T10:02:50"
    },
    "estoque": {
     "status": "ok",
-    "linhas": 24850,
-    "quando": "2026-10-06T09:06:28"
+    "linhas": 24846,
+    "quando": "2026-10-06T10:06:58"
    }
   },
   {
    "portal": "mv491",
    "vendas": {
     "status": "ok",
-    "linhas": 75,
-    "quando": "2026-10-06T09:03:27"
+    "linhas": 151,
+    "quando": "2026-10-06T10:03:53"
    },
    "estoque": {
     "status": "ok",
-    "linhas": 35927,
-    "quando": "2026-10-06T09:08:00"
+    "linhas": 35925,
+    "quando": "2026-10-06T10:08:28"
    }
   }
  ],
  "historico": [
+  {
+   "quando": "2026-10-06T10:08:28",
+   "tipo": "estoque",
+   "portal": "mv491",
+   "ok": true,
+   "linhas": 35925,
+   "detalhe": "exportado e salvo"
+  },
+  {
+   "quando": "2026-10-06T10:06:58",
+   "tipo": "estoque",
+   "portal": "mv449",
+   "ok": true,
+   "linhas": 24846,
+   "detalhe": "exportado e salvo"
+  },
+  {
+   "quando": "2026-10-06T10:05:48",
+   "tipo": "estoque",
+   "portal": "mv107",
+   "ok": true,
+   "linhas": 58928,
+   "detalhe": "exportado e salvo"
+  },
+  {
+   "quando": "2026-10-06T10:03:53",
+   "tipo": "vendas",
+   "portal": "mv491",
+   "ok": true,
+   "linhas": 151,
+   "detalhe": "exportado e salvo"
+  },
+  {
+   "quando": "2026-10-06T10:02:50",
+   "tipo": "vendas",
+   "portal": "mv449",
+   "ok": true,
+   "linhas": 50,
+   "detalhe": "exportado e salvo"
+  },
+  {
+   "quando": "2026-10-06T10:01:48",
+   "tipo": "vendas",
+   "portal": "mv107",
+   "ok": true,
+   "linhas": 248,
+   "detalhe": "exportado e salvo"
+  },
   {
    "quando": "2026-10-06T09:08:00",
    "tipo": "estoque",
@@ -2403,61 +2451,13 @@ window.ROBO = {
    "ok": true,
    "linhas": 1405,
    "detalhe": "exportado e salvo"
-  },
-  {
-   "quando": "2026-10-03T15:11:00",
-   "tipo": "estoque",
-   "portal": "mv491",
-   "ok": true,
-   "linhas": 35969,
-   "detalhe": "exportado e salvo"
-  },
-  {
-   "quando": "2026-10-03T15:08:43",
-   "tipo": "estoque",
-   "portal": "mv449",
-   "ok": true,
-   "linhas": 24943,
-   "detalhe": "exportado e salvo"
-  },
-  {
-   "quando": "2026-10-03T15:06:50",
-   "tipo": "estoque",
-   "portal": "mv107",
-   "ok": true,
-   "linhas": null,
-   "detalhe": "Relatório sem linhas de dados na tela - arquivo anterior mantido"
-  },
-  {
-   "quando": "2026-10-03T15:04:01",
-   "tipo": "vendas",
-   "portal": "mv491",
-   "ok": true,
-   "linhas": 566,
-   "detalhe": "exportado e salvo"
-  },
-  {
-   "quando": "2026-10-03T15:03:06",
-   "tipo": "vendas",
-   "portal": "mv449",
-   "ok": true,
-   "linhas": 443,
-   "detalhe": "exportado e salvo"
-  },
-  {
-   "quando": "2026-10-03T15:01:56",
-   "tipo": "vendas",
-   "portal": "mv107",
-   "ok": true,
-   "linhas": 1206,
-   "detalhe": "exportado e salvo"
   }
  ],
  "estado": "descansando",
  "portal": null,
  "etapa": null,
- "inicio_rodada": "2026-10-06T09:00:02",
- "fim_rodada": "2026-10-06T09:08:19",
+ "inicio_rodada": "2026-10-06T10:00:02",
+ "fim_rodada": "2026-10-06T10:08:47",
  "intervalo_horas": 1,
  "janela": [
   6,
@@ -2501,5 +2501,5 @@ window.ROBO = {
    "estoque": "ok"
   }
  ],
- "atualizado_em": "2026-10-06T09:08:19"
+ "atualizado_em": "2026-10-06T10:08:47"
 };
