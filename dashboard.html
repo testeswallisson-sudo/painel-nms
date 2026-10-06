@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>robo_Linx_Dados</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="robo-dados">
+<div class="app">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1>Dados coletados</h1>
+      <span class="signal" id="sinal"><i></i><span id="sinalTxt">aguardando dados…</span></span>
+      <button class="btn-primary" id="btnAtualizar" type="button"><svg class="ico" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7M20 4v5h-5"/></svg>Atualizar</button>
+    </header>
+    <div class="content">
+
+      <section class="row row--4" id="kpis">
+        <article class="card stat stat--sm"><h2 class="card__title">Faturamento</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="kFat">—</div><div class="delta" id="dFat">&nbsp;</div></div></div></article>
+        <article class="card stat stat--sm"><h2 class="card__title">Itens vendidos</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="kItens">—</div><div class="delta" id="dItens">&nbsp;</div></div></div></article>
+        <article class="card stat stat--sm"><h2 class="card__title">Estoque (unidades)</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="kSaldo">—</div><div class="delta" id="dSaldo">&nbsp;</div></div></div></article>
+        <article class="card stat stat--sm"><h2 class="card__title">Lojas com venda</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="kLojas">—</div><div class="delta" id="dLojas">&nbsp;</div></div></div></article>
+      </section>
+
+      <section class="row row--checks" id="conferencia">
+        <article class="card">
+          <h2 class="card__title">Conferência da coleta</h2>
+          <div class="health"><div class="kpi" id="kSaude">—</div><small id="dSaude"></small></div>
+          <div id="checks"></div>
+        </article>
+        <div style="display:flex;flex-direction:column;gap:22px;min-width:0">
+          <article class="card card--pad-table">
+            <h2 class="card__title">Por portal</h2>
+            <table class="table table--data"><thead><tr><th>Portal</th><th class="r">Vendas</th><th class="r">Estoque</th><th>Extração</th></tr></thead><tbody id="portais"></tbody></table>
+          </article>
+        </div>
+      </section>
+
+      <section class="card table-card" id="vendas">
+        <div class="table-card__head">
+          <h2 class="card__title">Faturamento por loja</h2>
+          <div class="tools"><input class="search" id="busca" type="search" placeholder="Filtrar loja…"><div class="segmented" id="fPortal"></div></div>
+        </div>
+        <div class="scroll"><table class="table table--data"><thead><tr><th>Loja</th><th>Portal</th><th class="r">Linhas</th><th class="r">Itens</th><th class="r">Produtos</th><th class="r">Cancel.</th><th class="r">Faturamento</th></tr></thead><tbody id="tVendas"></tbody><tfoot id="fVendas"></tfoot></table></div>
+      </section>
+
+      <section class="card table-card" id="estoque">
+        <div class="table-card__head"><h2 class="card__title">Estoque por loja</h2></div>
+        <div class="scroll"><table class="table table--data"><thead><tr><th>Loja</th><th>Portal</th><th class="r">Produtos</th><th class="r">Com saldo</th><th class="r">Zerados</th><th class="r">Negativos</th><th class="r">Saldo (un.)</th><th class="r" id="thValor">Valor</th></tr></thead><tbody id="tEstoque"></tbody><tfoot id="fEstoque"></tfoot></table></div>
+      </section>
+
+      <section class="row row--even" id="detalhes">
+        <article class="card card--pad-table"><div class="table-card__head"><h2 class="card__title">Vendas canceladas</h2></div>
+          <p class="nota" id="notaCanc"></p>
+          <div class="scroll"><table class="table table--data"><thead><tr><th>Loja</th><th>Produto</th><th class="r">Qtd</th><th class="r">Valor</th></tr></thead><tbody id="tCanc"></tbody></table></div></article>
+        <article class="card card--pad-table"><div class="table-card__head"><h2 class="card__title">Estoque com saldo negativo</h2></div>
+          <p class="nota" id="notaNeg"></p>
+          <div class="scroll"><table class="table table--data"><thead><tr><th>Loja</th><th>Produto</th><th class="r">Saldo</th></tr></thead><tbody id="tNeg"></tbody></table></div></article>
+      </section>
+
+      <section class="row row--even">
+        <article class="card card--pad-table"><h2 class="card__title">Naturezas de operação (vendas)</h2>
+          <table class="table table--data"><thead><tr><th>Natureza</th><th class="r">Linhas</th><th class="r">Faturamento</th></tr></thead><tbody id="tNat"></tbody></table></article>
+        <article class="card"><h2 class="card__title">Colunas usadas</h2><div class="cols" id="colunas"></div>
+          <p class="nota" id="notaIgn"></p>
+          <p class="nota">Se alguma coluna estiver errada, me diga o nome certo (ou defina no <code>.env</code>: COL_VALOR, COL_QTD, COL_SALDO, COL_CUSTO, COL_LOJA, COL_SKU).</p></article>
+      </section>
+    </div>
+  </main>
+</div>
+<script src="nav.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>

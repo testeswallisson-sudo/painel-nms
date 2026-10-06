@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>robo_Linx_Relatorios</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="robo-painel">
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <main class="main">
+    <header class="topbar">
+      <h1>Painel do Robô</h1>
+      <span class="signal" id="sinal"><i></i><span id="sinalTxt">aguardando dados…</span></span>
+      <button class="btn-primary" id="btnAtualizar" type="button"><svg class="ico" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7M20 4v5h-5"/></svg>Atualizar</button>
+    </header>
+
+    <div class="content">
+
+      <!-- Linha 1: estado do robô + próxima atualização -->
+      <section class="row row--2" id="painel">
+        <article class="card hero is-descansando" id="hero">
+          <div class="hero__mascot"><img id="mascote" src="mascote/descansando_soneca.png" alt="Mascote do robô"></div>
+          <div class="hero__info">
+            <span class="pill" id="pill"><i></i><span id="pillTxt">Sem dados</span></span>
+            <h2 class="hero__title" id="heroTitulo">Aguardando o robô</h2>
+            <p class="hero__sub" id="heroSub">Assim que o robô rodar pela primeira vez, o estado dele aparece aqui.</p>
+            <div class="alert" id="alerta" hidden></div>
+            <div class="steps" id="passos"></div>
+          </div>
+        </article>
+
+        <article class="card next" id="proxima">
+          <div class="next__head"><h2 class="card__title">Próxima atualização</h2><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></div>
+          <div class="kpi" id="contagem">—</div>
+          <div class="next__when" id="quando">&nbsp;</div>
+          <div class="until"><span id="barra"></span></div>
+          <div class="next__note" id="notaProx"></div>
+          <div class="agenda" id="agenda"></div>
+        </article>
+      </section>
+
+      <!-- Linha 2: KPIs -->
+      <section class="row row--3" id="kpis">
+        <article class="card stat">
+          <h2 class="card__title">Vendas consolidadas</h2>
+          <div class="stat__bottom">
+            <div class="stat__num"><div class="kpi" id="kVendas">—</div><div class="delta" id="dVendas">sem registro</div></div>
+            <div class="mini-bars" id="bVendas" aria-hidden="true"></div>
+          </div>
+        </article>
+        <article class="card stat">
+          <h2 class="card__title">Estoque consolidado</h2>
+          <div class="stat__bottom">
+            <div class="stat__num"><div class="kpi" id="kEstoque">—</div><div class="delta" id="dEstoque">sem registro</div></div>
+            <div class="mini-bars" id="bEstoque" aria-hidden="true"></div>
+          </div>
+        </article>
+        <article class="card stat">
+          <h2 class="card__title">Portais</h2>
+          <div class="stat__bottom">
+            <div class="stat__num"><div class="kpi" id="kPortais">—</div><div class="delta" id="dPortais">sem registro</div></div>
+            <div class="portlist" id="listaPortais"></div>
+          </div>
+        </article>
+      </section>
+
+      <!-- Linha 3: histórico -->
+      <section class="card table-card" id="historico">
+        <div class="table-card__head">
+          <h2 class="card__title">Últimas execuções</h2>
+          <div class="segmented" id="filtro">
+            <button type="button" data-f="todos" class="is-active">Todos</button><button type="button" data-f="vendas">Vendas</button><button type="button" data-f="estoque">Estoque</button>
+          </div>
+        </div>
+        <div class="scroll scroll--6"><table class="table">
+          <thead><tr><th style="width:13%">Quando</th><th style="width:14%">Relatório</th><th style="width:12%">Portal</th><th style="width:16%">Resultado</th><th style="width:12%">Linhas</th><th>Detalhe</th></tr></thead>
+          <tbody id="corpo"></tbody>
+        </table></div>
+        <div class="empty" id="vazio" hidden>Nenhuma execução registrada ainda.</div>
+      </section>
+    </div>
+  </main>
+</div>
+<script src="nav.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>robo_Linx_Analises</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="analises">
+<div class="app">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <header class="topbar">
+      <h1 id="titulo">Análises</h1>
+      <span class="signal" id="sinal"><i></i><span id="sinalTxt">aguardando dados…</span></span>
+      <button class="btn-primary" id="btnAtualizar" type="button"><svg class="ico" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7M20 4v5h-5"/></svg>Atualizar</button>
+    </header>
+    <div class="content" id="conteudo">
+
+      <!-- ============ RESUMO ============ -->
+      <section class="modsec" id="s-resumo" style="display:contents">
+        <div class="row row--4">
+          <article class="card stat stat--sm"><h2 class="card__title" id="rTFatDia">Faturamento do dia</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="rFatDia">—</div><div class="delta" id="rFatDiaD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title" id="rTFatMes">Faturamento do mês</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="rFatMes">—</div><div class="delta" id="rFatMesD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Estoque (valor a custo)</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="rEstVal">—</div><div class="delta" id="rEstValD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Estoque (unidades)</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="rEstUn">—</div><div class="delta" id="rEstUnD">&nbsp;</div></div></div></article>
+        </div>
+        <div class="row row--4">
+          <article class="card stat stat--sm"><h2 class="card__title" id="rTProj">Projeção do mês</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="rProj">—</div><div class="delta" id="rProjD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title" id="rTMedia">Média por dia</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="rMedia">—</div><div class="delta" id="rMediaD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title" id="rTCanc">Cancelado no dia</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="rCanc">—</div><div class="delta" id="rCancD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Saldos negativos</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="rNeg">—</div><div class="delta" id="rNegD">&nbsp;</div></div></div></article>
+        </div>
+        <div class="row row--65">
+          <article class="card"><div class="table-card__head"><h2 class="card__title" id="evoTitulo">Faturamento por dia</h2><select class="select" id="evoMes" title="Escolher o mês"></select><div class="evo-stats" id="evoStats"></div></div><div id="evoChart"></div><p class="nota" id="notaDias"></p></article>
+          <article class="card"><h2 class="card__title">O que chama atenção</h2><ul class="insights" id="insights"></ul></article>
+        </div>
+        <div class="row row--even">
+          <article class="card"><h2 class="card__title" id="rTLojas">Faturamento por loja — hoje</h2><div class="hb" id="rLojas"></div></article>
+          <article class="card"><h2 class="card__title">Média por dia da semana</h2><div class="hb" id="rDow"></div><p class="nota" id="rDowNota">Só dias já fechados do mês (o dia corrente fica de fora).</p></article>
+        </div>
+      </section>
+
+      <!-- ============ VENDAS ============ -->
+      <section class="modsec" id="s-vendas" style="display:none">
+        <div class="sec-head"><div><h2>Vendas</h2><p id="vSub"></p></div><div class="segmented" id="vPeriodo"><button type="button" data-p="dia" class="is-active">Hoje</button><button type="button" data-p="mes">Mês</button></div></div>
+        <div class="row row--4">
+          <article class="card stat stat--sm"><h2 class="card__title">Faturamento</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="vFat">—</div><div class="delta" id="vFatD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Itens vendidos</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="vItens">—</div><div class="delta" id="vItensD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Preço médio por item</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="vPm">—</div><div class="delta" id="vPmD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Lojas com venda</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="vLojas">—</div><div class="delta" id="vLojasD">&nbsp;</div></div></div></article>
+        </div>
+        <div class="row row--4">
+          <article class="card stat stat--sm"><h2 class="card__title">Margem bruta</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="vMg">—</div><div class="delta" id="vMgD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Custo das vendas</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="vCusto">—</div><div class="delta" id="vCustoD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Horário de pico</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="vPico">—</div><div class="delta" id="vPicoD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Tabela de preço principal</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="vTabP" style="font-size:20px">—</div><div class="delta" id="vTabPD">&nbsp;</div></div></div></article>
+        </div>
+        <div class="row row--even">
+          <article class="card"><h2 class="card__title">Faturamento por hora do dia</h2><div id="vHoras"></div><p class="nota" id="vHorasNota"></p></article>
+          <article class="card card--pad-table"><h2 class="card__title">Tabela de preço</h2><div class="scroll"><table class="table table--data"><thead><tr><th>Tabela</th><th class="r">Linhas</th><th class="r">Part.</th><th class="r">Faturamento</th></tr></thead><tbody id="vTabelas"></tbody></table></div></article>
+        </div>
+        <article class="card table-card"><div class="table-card__head"><h2 class="card__title">Faturamento por loja</h2></div>
+          <div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th>Loja</th><th>Portal</th><th class="r">Linhas</th><th class="r">Itens</th><th class="r">Preço médio</th><th class="r">Cancelado</th><th class="r">Margem</th><th class="r">Part.</th><th class="r">Faturamento</th></tr></thead><tbody id="vTabLojas"></tbody><tfoot id="vFootLojas"></tfoot></table></div></article>
+        <div class="row row--tri">
+          <article class="card card--pad-table"><h2 class="card__title">Tipos de venda (natureza)</h2><div class="scroll scroll--6"><table class="table table--data tbl-3"><thead><tr><th>Natureza</th><th class="r">Part.</th><th class="r">Faturamento</th></tr></thead><tbody id="vTipos"></tbody></table></div></article>
+          <article class="card card--pad-table"><h2 class="card__title">Fornecedores</h2><div class="scroll scroll--6"><table class="table table--data tbl-3"><thead><tr><th>Fornecedor</th><th class="r">Part.</th><th class="r">Faturamento</th></tr></thead><tbody id="vForn"></tbody></table></div></article>
+          <article class="card card--pad-table"><h2 class="card__title">Vendedores</h2><div class="scroll scroll--6"><table class="table table--data tbl-3"><thead><tr><th>Vendedor</th><th class="r">Linhas</th><th class="r">Faturamento</th></tr></thead><tbody id="vVend"></tbody></table></div></article>
+        </div>
+      </section>
+
+      <!-- ============ PRODUTOS ============ -->
+      <section class="modsec" id="s-produtos" style="display:none">
+        <div class="sec-head"><div><h2>Faturamento por produto</h2><p id="pSub"></p></div><div class="tools"><select class="select sel-marca" style="display:none"></select><input class="search" id="pBusca" type="search" placeholder="Filtrar produto…"><div class="segmented" id="pPeriodo"><button type="button" data-p="dia" class="is-active">Hoje</button><button type="button" data-p="mes">Mês</button></div></div></div>
+        <article class="card table-card"><div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th style="width:44px">#</th><th>Produto</th><th>Marca</th><th class="r">Itens</th><th class="r">Preço médio</th><th class="r">Lojas</th><th class="r">Margem</th><th class="r">Part.</th><th class="r">Faturamento</th></tr></thead><tbody id="pTab"></tbody></table></div><p class="nota" id="pNota"></p></article>
+      </section>
+
+      <!-- ============ CURVA ABC ============ -->
+      <section class="modsec" id="s-abc" style="display:none">
+        <div class="sec-head"><div><h2 id="abcTit">Curva ABC do dia</h2><p id="abcSub">A = produtos que somam até 80% do faturamento da loja · B = até 95% · C = o restante. Base: vendas de hoje (sem canceladas). Todos os itens são listados.</p></div><div class="filtros"><div class="segmented" id="abcPeriodo"><button type="button" data-p="dia" class="is-active">Hoje</button><button type="button" data-p="mes">Mês</button><button type="button" data-p="per">Período</button></div><span id="abcDatas" style="display:none;gap:6px;align-items:center"><input class="select" type="date" id="abcDe" title="De"><span style="color:var(--muted)">até</span><input class="select" type="date" id="abcAte" title="Até"></span><select class="select" id="abcLoja"></select><select class="select sel-marca" style="display:none"></select><div class="segmented" id="abcClasse"><button data-c="" class="is-active">Todas</button><button data-c="A">A</button><button data-c="B">B</button><button data-c="C">C</button></div><input class="select" id="abcBusca" type="search" placeholder="Buscar produto…"><button class="btn-csv" id="abcCsv" type="button">Exportar CSV</button></div></div>
+        <div class="abc-cards" id="abcCards"></div>
+        <article class="card table-card"><div class="table-card__head"><h2 class="card__title" id="abcTitulo">Produtos</h2></div><div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th style="width:44px">#</th><th>Produto</th><th>Marca</th><th style="width:60px">Classe</th><th class="r">Itens</th><th class="r">Acumulado</th><th class="r">Faturamento</th></tr></thead><tbody id="abcTab"></tbody></table></div><p class="nota" id="abcNota"></p></article>
+      </section>
+
+      <!-- ============ ESTOQUE ============ -->
+      <section class="modsec" id="s-estoque" style="display:none">
+        <div class="sec-head"><div><h2>Estoque</h2><p id="eSub"></p></div><div class="filtros"><select class="select sel-marca" style="display:none"></select></div></div>
+        <div id="eAviso"></div>
+        <div class="row row--4">
+          <article class="card stat stat--sm"><h2 class="card__title">Valor em estoque</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="eVal">—</div><div class="delta" id="eValD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Unidades</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="eUn">—</div><div class="delta" id="eUnD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Estoque parado (sem venda no mês)</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="ePar">—</div><div class="delta" id="eParD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Rupturas (vendeu e está sem saldo)</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="eRup">—</div><div class="delta" id="eRupD">&nbsp;</div></div></div></article>
+        </div>
+        <article class="card table-card"><div class="table-card__head"><h2 class="card__title">Estoque por loja</h2></div>
+          <div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th>Loja</th><th>Portal</th><th class="r">Produtos</th><th class="r">Zerados</th><th class="r">Unidades</th><th class="r">Parado (valor)</th><th class="r">Rupturas</th><th class="r">Cobertura</th><th class="r">Valor</th></tr></thead><tbody id="eTab"></tbody><tfoot id="eFoot"></tfoot></table></div>
+          <p class="nota">Cobertura = unidades em estoque ÷ média diária de unidades vendidas no mês (em dias).</p></article>
+        <div class="row row--even">
+          <article class="card card--pad-table"><h2 class="card__title">Maiores valores em estoque (produto)</h2><div class="scroll"><table class="table table--data"><thead><tr><th>Produto</th><th>Marca</th><th class="r">Lojas</th><th class="r">Un.</th><th class="r">Valor</th></tr></thead><tbody id="eTop"></tbody></table></div></article>
+          <article class="card card--pad-table"><h2 class="card__title">Estoque parado — maiores valores</h2><div class="scroll"><table class="table table--data"><thead><tr><th>Loja</th><th>Produto</th><th>Marca</th><th class="r">Un.</th><th class="r">Valor</th></tr></thead><tbody id="ePar2"></tbody></table></div></article>
+        </div>
+        <article class="card card--pad-table"><h2 class="card__title">Rupturas — produtos que vendem e estão sem saldo</h2><div class="scroll"><table class="table table--data"><thead><tr><th>Loja</th><th>Produto</th><th>Marca</th><th class="r">Saldo</th><th class="r">Vendido no mês</th><th class="r">Faturamento</th></tr></thead><tbody id="eRup2"></tbody></table></div></article>
+      </section>
+
+            <!-- ============ ESTOQUE POR PRODUTO ============ -->
+      <section class="modsec" id="s-estqprod" style="display:none">
+        <div class="sec-head"><div><h2>Estoque por produto</h2><p id="epSub"></p></div>
+          <div class="filtros"><select class="select" id="epLoja"></select><select class="select sel-marca" style="display:none"></select><input class="select" id="epBusca" type="search" placeholder="Buscar produto ou código…"><select class="select" id="epOrd"><option value="valor">Maior valor</option><option value="saldo">Maior saldo</option><option value="vendido">Mais vendidos</option><option value="cob">Menor cobertura</option><option value="dsv">Mais dias sem venda</option><option value="nome">Nome (A–Z)</option></select><button class="btn-csv" id="epCsv" type="button">Exportar CSV</button></div></div>
+        <div id="epAviso"></div>
+        <div class="row row--4" id="epKpis"></div>
+        <div class="chips" id="epChips"></div>
+        <article class="card table-card"><div class="table-card__head"><h2 class="card__title" id="epTitulo">Produtos</h2></div>
+          <div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th>Produto</th><th>Marca</th><th>Situação</th><th class="r">Saldo</th><th class="r">Valor em estoque</th><th class="r">Vendido (janela)</th><th class="r">Faturamento</th><th class="r">Cobertura</th><th class="r">Dias sem vendas</th><th class="r" id="epColRede">Lojas</th></tr></thead><tbody id="epTab"></tbody></table></div>
+          <div class="pager"><button class="btn-csv" id="epMais" type="button" style="display:none">Mostrar mais 200</button><span class="nota" id="epNota"></span></div></article>
+      </section>
+
+<!-- ============ REPOSIÇÃO · ANÁLISE DE CURVA ============ -->
+      <section class="modsec" id="s-repcurva" style="display:none">
+        <div class="sec-head"><div><h2>Reposição lojas · Análise de curva</h2><p>O que repor em cada loja, cruzando saldo, vendas dos 3 meses, lead time e pedidos já feitos.</p></div>
+          <div class="filtros"><select class="select" id="rcLoja"></select><select class="select" id="rcMarca" style="display:none"></select><input class="select" id="rcBusca" type="search" placeholder="Buscar produto ou código…"><select class="select" id="rcOrd"><option value="sug">Maior sugestão</option><option value="mes">Mais vendido no mês</option><option value="dsv">Mais dias sem vendas</option><option value="nome">Nome</option></select><button class="btn-csv" id="rcCsv" type="button">Exportar CSV</button></div></div>
+        <article class="card param-card"><div class="param-row">
+          <label>Dias de reposição<input class="num-in num-in--lg" type="number" id="rcDias" min="0" step="1"></label>
+          <label>Lead time (dias)<input class="num-in num-in--lg" type="number" id="rcLead" min="0" step="1"></label>
+          <label>Base da demanda<select class="select" id="rcBase"><option value="30">Últimos 30 dias</option><option value="dia">Dia atual</option><option value="sem">Semana atual</option><option value="3m">3 meses (atual + 2)</option></select></label>
+          <div class="segmented" id="rcVisao"><button type="button" data-v="lp" class="is-active">Loja × produto</button><button type="button" data-v="prod">Por produto (todas as lojas)</button></div>
+          <div class="segmented" id="rcSo"><button type="button" data-s="1" class="is-active">Só quem precisa repor</button><button type="button" data-s="0">Todos</button></div></div>
+          <p class="nota" id="rcFormula" style="margin:10px 0 0"></p></article>
+        <div id="rcAviso"></div>
+        <div class="row row--4" id="rcKpis"></div>
+        <article class="card table-card"><div class="table-card__head"><h2 class="card__title" id="rcTitulo">Produtos</h2></div>
+          <div class="scroll scroll--tall"><table class="table table--data"><thead id="rcHead"></thead><tbody id="rcTab"></tbody></table></div>
+          <div class="pager"><button class="btn-csv" id="rcMais" type="button" style="display:none">Mostrar mais 200</button><span class="nota" id="rcNota"></span></div></article>
+      </section>
+
+      <!-- ============ REPOSIÇÃO · PEDIDOS ============ -->
+      <section class="modsec" id="s-reppedidos" style="display:none">
+        <div class="sec-head"><div><h2>Reposição lojas · Pedidos</h2><p>As quantidades pedidas entram na análise de curva (descontadas da sugestão). Cada pedido expira em 48 h, ou você exclui na hora.</p></div>
+          <div class="filtros"><select class="select" id="pdLoja"></select><input class="select" id="pdBusca" type="search" placeholder="Buscar produto ou código…"><button class="btn-csv" id="pdCsv" type="button">Exportar CSV</button></div></div>
+        <div class="row row--4" id="pdKpis"></div>
+        <article class="card param-card"><div class="param-row">
+          <label>Loja<select class="select" id="pdNovaLoja"></select></label>
+          <label>Código do produto<input class="select" id="pdNovoCod" type="text" placeholder="ex.: 243032"></label>
+          <label>Quantidade<input class="num-in num-in--lg" id="pdNovaQtd" type="number" min="1" step="1"></label>
+          <button class="btn-primary" id="pdNovo" type="button" style="align-self:flex-end">Adicionar pedido</button>
+          <span class="nota" id="pdMsg" style="align-self:flex-end"></span></div>
+          <p class="nota" style="margin:10px 0 0">Dica: o jeito mais rápido é usar o botão <b>Pedir</b> direto na tabela da análise de curva. Os pedidos ficam salvos neste navegador/computador.</p></article>
+        <div class="chips" id="pdFiltro"><button type="button" data-f="ativos" class="is-active">Ativos</button><button type="button" data-f="exp">Expirados</button><button type="button" data-f="todos">Todos</button></div>
+        <article class="card table-card"><div class="table-card__head"><h2 class="card__title">Pedidos</h2>
+          <div class="filtros"><button class="btn-csv" id="pdLimpar" type="button">Limpar expirados</button><button class="btn-csv" id="pdTudo" type="button">Excluir todos</button><button class="btn-csv" id="pdBackup" type="button">Backup (JSON)</button><label class="btn-csv" style="display:inline-flex;align-items:center;cursor:pointer">Restaurar backup<input type="file" id="pdRestore" accept=".json" style="display:none"></label></div></div>
+          <div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th>Criado em</th><th>Expira em</th><th>Loja</th><th>Cód.</th><th>Produto</th><th class="r">Qtd</th><th class="r"></th></tr></thead><tbody id="pdTab"></tbody></table></div></article>
+      </section>
+
+<!-- ============ CANCELAMENTOS E SALDOS ============ -->
+      <section class="modsec" id="s-alertas" style="display:none">
+        <div class="sec-head"><div><h2>Cancelamentos e saldos negativos</h2><p>O que precisa de revisão no Linx.</p></div><div class="filtros"><select class="select sel-marca" style="display:none"></select></div></div>
+        <div class="row row--4">
+          <article class="card stat stat--sm"><h2 class="card__title">Canceladas hoje</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="aCD">—</div><div class="delta" id="aCDD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Canceladas no mês</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="aCM">—</div><div class="delta" id="aCMD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Linhas com saldo negativo</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="aNL">—</div><div class="delta" id="aNLD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Valor do saldo negativo</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="aNV">—</div><div class="delta" id="aNVD">&nbsp;</div></div></div></article>
+        </div>
+        <div class="row row--even">
+          <article class="card card--pad-table"><h2 class="card__title">Cancelamentos por loja (mês)</h2><div class="scroll"><table class="table table--data"><thead><tr><th>Loja</th><th class="r">Linhas</th><th class="r">Valor</th></tr></thead><tbody id="aCLoja"></tbody></table></div></article>
+          <article class="card card--pad-table"><h2 class="card__title">Saldo negativo por loja</h2><div class="scroll"><table class="table table--data"><thead><tr><th>Loja</th><th class="r">Linhas</th><th class="r">Unidades</th><th class="r">Valor</th></tr></thead><tbody id="aNLoja"></tbody></table></div></article>
+        </div>
+        <div class="row row--even">
+          <article class="card card--pad-table"><h2 class="card__title">Maiores cancelamentos do dia</h2><div class="scroll"><table class="table table--data"><thead><tr><th>Loja</th><th>Produto</th><th>Marca</th><th class="r">Qtd</th><th class="r">Valor</th></tr></thead><tbody id="aCLista"></tbody></table></div></article>
+          <article class="card card--pad-table"><h2 class="card__title">Maiores saldos negativos</h2><div class="scroll"><table class="table table--data"><thead><tr><th>Loja</th><th>Produto</th><th>Marca</th><th class="r">Saldo</th><th class="r">Valor</th></tr></thead><tbody id="aNLista"></tbody></table></div></article>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+<script src="nav.js"></script>
+<script src="analises_data.js"></script>
+<script src="reposicao_ui.js"></script>
+<script src="analises_ui.js"></script>
+</body>
+</html>
