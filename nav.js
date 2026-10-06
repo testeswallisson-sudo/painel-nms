@@ -25,6 +25,7 @@
       { id: "an-alertas", href: "analises.html#alertas", icone: "warn", txt: "Cancelamentos e saldos" }] },
     { titulo: "Módulo · Reposição lojas", itens: [
       { id: "an-repcurva", href: "analises.html#repcurva", icone: "abc", txt: "Análise de curva" },
+      { id: "an-repredist", href: "analises.html#repredist", icone: "box", txt: "Redistribuição de parados" },
       { id: "an-reppedidos", href: "analises.html#reppedidos", icone: "tag", txt: "Pedidos" }] }
   ];
   var KEY = "nav_grupos_v1", estado = {};
@@ -60,4 +61,20 @@
     estado[g] = !fechar; try { localStorage.setItem(KEY, JSON.stringify(estado)); } catch (x) { }
   });
   window.addEventListener("hashchange", montar);
+
+  /* ---------- celular: menu em gaveta ---------- */
+  (function () {
+    var tb = document.querySelector(".topbar"), sb = document.getElementById("sidebar");
+    if (!tb || !sb) return;
+    var btn = document.createElement("button");
+    btn.type = "button"; btn.className = "menu-btn"; btn.setAttribute("aria-label", "Abrir menu");
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+    tb.insertBefore(btn, tb.firstChild);
+    var bd = document.createElement("div"); bd.className = "side-backdrop"; document.body.appendChild(bd);
+    function abrir(v) { document.body.classList.toggle("menu-aberto", v); }
+    btn.addEventListener("click", function () { abrir(!document.body.classList.contains("menu-aberto")); });
+    bd.addEventListener("click", function () { abrir(false); });
+    sb.addEventListener("click", function (e) { if (e.target.closest("a[href]")) abrir(false); });
+    window.addEventListener("hashchange", function () { abrir(false); });
+  })();
 })();

@@ -24,7 +24,9 @@
   function lerLS(k, pad_) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : pad_; } catch (e) { return mem[k] !== undefined ? mem[k] : pad_; } }
   function gravarLS(k, v) { mem[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } }
   var P = lerLS("nms_repo_params", null) || { dias: 30, lead: 7, base: "30" };
+  if (P.parado == null) P.parado = 30;
   var R = { loja: "", marca: "", q: "", visao: "lp", so: true, ord: "sug", lim: 200, exp: {} };
+  var RD = { loja: "", marca: "", q: "", ord: "qtd", so: true, lim: 200, exp: {} };
   var PD = { f: "ativos", q: "", loja: "", ok: "" };
 
   var ped = lerLS("nms_pedidos_v1", []);
@@ -149,6 +151,74 @@
     [].forEach.call($("rcSo").children, function (b) { b.classList.toggle("is-active", (b.getAttribute("data-s") === "1") === R.so); });
   }
 
+
+  /* ---------- redistribuição de parados ---------- */
+  function aloca(S, dest) {
+    var T = dest.reduce(function (a, d) { return a + d.rem; }, 0), out = dest.map(function () { return 0; });
+    if (S <= 0 || T <= 0) return out;
+    if (S >= T) return dest.map(function (d) { return d.rem; });
+    var fr = [], tot = 0;
+    dest.forEach(function (d, i) { var v = S * d.rem / T; out[i] = Math.min(d.rem, Math.floor(v)); tot += out[i]; fr.push([i, v - Math.floor(v)]); });
+    fr.sort(function (a, b) { return b[1] - a[1] || dest[b[0]].rem - dest[a[0]].rem; });
+    for (var j = 0; tot < S && j < fr.length * 2; j++) { var i = fr[j % fr.length][0]; if (out[i] < dest[i].rem) { out[i]++; tot++; } }
+    return out;
+  }
+  function ehParado(o) { return o.saldo > 0 && (o.dsv == null || o.dsv >= P.parado); }
+  function redistrib(a) {
+    A = a;
+    if (!A.estoque || !lojasIdx().length) { setHTML("rdAviso", '<div class="aviso-box">Estoque ainda não coletado — rode o robô e o <b>abrir_analises.bat</b>.</div>'); return; }
+    var sel = $("rdLoja"), opt = '<option value="">TODAS AS LOJAS (origem)</option>' + lojasIdx().map(function (l) { return '<option value="' + esc(l.loja) + '">' + esc(l.loja) + "</option>"; }).join("");
+    if (sel._o !== opt) { sel._o = opt; sel.innerHTML = opt; sel.value = RD.loja; }
+    $("rdDias").value = P.dias; $("rdLead").value = P.lead; $("rdBase").value = P.base; $("rdParado").value = P.parado;
+    if (!carregar(function () { App.render(); })) {
+      setHTML("rdAviso", carga.erro ? '<div class="aviso-box">Arquivos de reposição não encontrados — rode <b>abrir_analises.bat</b>.</div>' : "");
+      setHTML("rdTab", '<tr><td colspan="11">' + (carga.erro ? "Sem dados." : "Carregando…") + "</td></tr>"); return;
+    }
+    setHTML("rdAviso", "");
+    var todas = linhas(), porK = {};
+    todas.forEach(function (o) { (porK[o.k] = porK[o.k] || []).push(o); });
+    var res = [];
+    Object.keys(porK).forEach(function (k) {
+      var rows = porK[k], pars = rows.filter(ehParado).sort(function (x, y) { return y.saldo - x.saldo; });
+      if (!pars.length) return;
+      var dests = rows.filter(function (o) { return !ehParado(o) && o.dem > 0 && o.sug > 0; }).map(function (o) { return { o: o, rem: o.sug }; });
+      var demOutras = {};
+      pars.forEach(function (p) {
+        var cand = dests.filter(function (d) { return d.o.loja !== p.loja && d.rem > 0; });
+        var q = aloca(p.saldo, cand), lista = [], tot = 0;
+        cand.forEach(function (d, i) { if (q[i] > 0) { lista.push({ o: d.o, qtd: q[i], need: d.rem }); tot += q[i]; d.rem -= q[i]; } });
+        var demSum = rows.filter(function (o) { return o.loja !== p.loja && !ehParado(o); }).reduce(function (s, o) { return s + o.dem; }, 0);
+        res.push({ p: p, dest: lista.sort(function (x, y) { return y.qtd - x.qtd; }), qtd: tot, sobra: p.saldo - tot, dem: demSum });
+      });
+    });
+    var q = RD.q.toLowerCase();
+    var base = res.filter(function (r) { return (!RD.loja || r.p.loja === RD.loja) && (!RD.marca || r.p.marca === RD.marca) && (!q || r.p.desc.toLowerCase().indexOf(q) >= 0 || r.p.k.toLowerCase().indexOf(q) >= 0); });
+    var marcas = {}; res.forEach(function (r) { if (r.p.marca) marcas[r.p.marca] = 1; });
+    var mo = '<option value="">TODAS AS MARCAS</option>' + Object.keys(marcas).sort(function (x, y) { return x.localeCompare(y, "pt-BR"); }).map(function (m) { return '<option value="' + esc(m) + '">' + esc(m) + "</option>"; }).join("");
+    var sm = $("rdMarca"); if (sm._o !== mo) { sm._o = mo; sm.innerHTML = mo; sm.value = RD.marca; } sm.style.display = Object.keys(marcas).length ? "" : "none";
+    var com = base.filter(function (r) { return r.qtd > 0; });
+    var kp = [["Parados analisados", N0.format(base.length), "loja × produto sem venda há " + P.parado + "+ dias"], ["Com destino", N0.format(com.length), "há outra loja vendendo e precisando"],
+      ["Unidades a transferir", N0.format(com.reduce(function (s, r) { return s + r.qtd; }, 0)), "de " + N0.format(base.reduce(function (s, r) { return s + r.p.saldo; }, 0)) + " un. paradas"], ["Sem destino", N0.format(base.length - com.length), "ninguém vende ou nenhuma precisa"]];
+    setHTML("rdKpis", kp.map(function (k) { return '<article class="card stat stat--sm"><h2 class="card__title">' + k[0] + '</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi">' + k[1] + '</div><div class="delta">' + k[2] + "</div></div></div></article>"; }).join(""));
+    var rows2 = (RD.so ? com : base).slice().sort(RD.ord === "saldo" ? function (x, y) { return y.p.saldo - x.p.saldo; } : RD.ord === "dsv" ? function (x, y) { return (y.p.dsv == null ? 1e9 : y.p.dsv) - (x.p.dsv == null ? 1e9 : x.p.dsv); } : function (x, y) { return y.qtd - x.qtd || y.p.saldo - x.p.saldo; });
+    var lim = rows2.slice(0, RD.lim);
+    setHTML("rdTab", lim.map(function (r) {
+      var id = r.p.loja + "|" + r.p.k, ab = RD.exp[id];
+      var dest = r.dest.length ? r.dest.map(function (d) { return esc(d.o.loja) + " <b>(" + N0.format(d.qtd) + ")</b>"; }).join(" · ") : '<span style="color:var(--muted)">sem destino</span>';
+      var s = '<tr class="lnk" data-rexp="' + esc(id) + '"><td>' + (r.dest.length ? (ab ? "▾" : "▸") : "") + "</td><td>" + esc(r.p.k) + "</td><td>" + esc(r.p.desc) + "</td><td>" + esc(r.p.marca) + "</td><td>" + esc(r.p.loja) + '</td><td class="r">' + N0.format(r.p.saldo) + '</td><td class="r">' + (r.p.dsv == null ? "—" : N0.format(r.p.dsv) + " d") + '</td><td class="r">' + N1.format(r.dem) + '</td><td class="r">' + (r.qtd ? "<b>" + N0.format(r.qtd) + "</b>" : "—") + "</td><td>" + dest + '</td><td class="r">' + N0.format(r.sobra) + "</td></tr>";
+      if (ab && r.dest.length) {
+        s += '<tr class="subtab"><td></td><td colspan="10"><table class="table table--data"><thead><tr><th>Loja destino</th><th class="r">Saldo</th><th class="r">Demanda/dia</th><th class="r">Cobertura</th><th class="r">Em pedido</th><th class="r">Necessidade</th><th class="r">Enviar</th></tr></thead><tbody>' +
+          r.dest.map(function (d) { return "<tr><td>" + esc(d.o.loja) + '</td><td class="r">' + N0.format(d.o.saldo) + '</td><td class="r">' + N1.format(d.o.dem) + '</td><td class="r">' + (d.o.cob == null ? "—" : N1.format(d.o.cob) + " d") + '</td><td class="r">' + (d.o.ped ? N0.format(d.o.ped) : "—") + '</td><td class="r">' + N0.format(d.need) + '</td><td class="r"><b>' + N0.format(d.qtd) + "</b></td></tr>"; }).join("") + "</tbody></table></td></tr>";
+      }
+      return s;
+    }).join("") || '<tr><td colspan="11">Nenhum produto parado neste filtro.</td></tr>');
+    setTxt("rdTitulo", N0.format(rows2.length) + " produto(s) parado(s) · clique na linha para ver os destinos");
+    $("rdMais").style.display = rows2.length > lim.length ? "" : "none";
+    setTxt("rdNota", "Mostrando " + N0.format(lim.length) + " de " + N0.format(rows2.length) + ". Regra: parado = saldo > 0 e sem venda há " + P.parado + "+ dias. Destino = outra loja que vende o produto, não está parada nele e precisa repor (demanda × (" + P.dias + " + " + P.lead + " dias) − saldo − pedidos). Se o saldo parado não cobre todas as necessidades, divide proporcional à necessidade; um mesmo destino não é contado duas vezes.");
+    [].forEach.call($("rdSo").children, function (b) { b.classList.toggle("is-active", (b.getAttribute("data-s") === "1") === RD.so); });
+    $("rdCsv")._r = rows2;
+  }
+
   /* ---------- pedidos ---------- */
   function restante(p) { var ms = p.t + EXP_MS - Date.now(); if (ms <= 0) return null; var h = Math.floor(ms / 3600e3), m = Math.floor(ms % 3600e3 / 60e3); return h + "h " + pad(m) + "min"; }
   function pedidos(a) {
@@ -200,6 +270,23 @@
       if (R.visao === "lp" && bt._rows) csvBaixar("reposicao_curva.csv", ["Cód.", "Descrição", "Loja", "Marca", "Saldo em loja", mc[0], mc[1], mc[2], "Dias sem vendas", "Cobertura (dias)", "Em pedido", "Sugestão de reposição", "Última venda"], bt._rows.map(function (o) { return [o.k, o.desc, o.loja, o.marca, o.saldo, o.m[0], o.m[1], o.m[2], o.dsv == null ? "" : o.dsv, o.cob == null ? "" : Math.round(o.cob * 10) / 10, o.ped, o.sug, o.ult]; }));
       else if (bt._arr) csvBaixar("reposicao_por_produto.csv", ["Cód.", "Descrição", "Saldo (rede)", mc[0], mc[1], mc[2], "Dias sem vendas", "Em pedido", "Sugestão total", "Lojas que precisam", "Última venda"], bt._arr.map(function (x) { return [x.k, x.desc, x.saldo, x.m[0], x.m[1], x.m[2], x.dsv == null ? "" : x.dsv, x.ped, x.sug, x.nlojas, x.ult]; }));
     });
+
+    /* redistribuição */
+    var parRd = function () { var d = parseFloat($("rdDias").value), l = parseFloat($("rdLead").value), pa = parseFloat($("rdParado").value); P.dias = d >= 0 ? d : 0; P.lead = l >= 0 ? l : 0; P.parado = pa >= 1 ? pa : 30; P.base = $("rdBase").value; gravarLS("nms_repo_params", P); rep(); };
+    ["rdDias", "rdLead", "rdParado"].forEach(function (id) { $(id).addEventListener("change", parRd); });
+    $("rdBase").addEventListener("change", parRd);
+    $("rdLoja").addEventListener("change", function (e) { RD.loja = e.target.value; RD.lim = 200; rep(); });
+    $("rdMarca").addEventListener("change", function (e) { RD.marca = e.target.value; RD.lim = 200; rep(); });
+    $("rdBusca").addEventListener("input", function (e) { RD.q = e.target.value; RD.lim = 200; rep(); });
+    $("rdOrd").addEventListener("change", function (e) { RD.ord = e.target.value; rep(); });
+    $("rdSo").addEventListener("click", function (e) { var b = e.target.closest("button[data-s]"); if (!b) return; RD.so = b.getAttribute("data-s") === "1"; RD.lim = 200; rep(); });
+    $("rdMais").addEventListener("click", function () { RD.lim += 200; rep(); });
+    $("rdTab").addEventListener("click", function (e) { var tr = e.target.closest("tr[data-rexp]"); if (tr) { var k = tr.getAttribute("data-rexp"); RD.exp[k] = !RD.exp[k]; rep(); } });
+    $("rdCsv").addEventListener("click", function () {
+      var r = $("rdCsv")._r; if (!r) return;
+      csvBaixar("redistribuicao_parados.csv", ["Cód.", "Descrição", "Marca", "Loja origem", "Saldo parado", "Dias sem vendas", "Demanda/dia outras lojas", "Qtd a transferir", "Destinos", "Fica na origem"],
+        r.map(function (x) { return [x.p.k, x.p.desc, x.p.marca, x.p.loja, x.p.saldo, x.p.dsv == null ? "" : x.p.dsv, Math.round(x.dem * 10) / 10, x.qtd, x.dest.map(function (d) { return d.o.loja + " (" + d.qtd + ")"; }).join(" | "), x.sobra]; }));
+    });
     /* pedidos */
     $("pdFiltro").addEventListener("click", function (e) { var b = e.target.closest("button[data-f]"); if (!b) return; PD.f = b.getAttribute("data-f"); rep(); });
     $("pdLoja").addEventListener("change", function (e) { PD.loja = e.target.value; rep(); });
@@ -222,7 +309,7 @@
       rd.readAsText(f);
     });
     window.addEventListener("storage", function (e) { if (e.key === "nms_pedidos_v1") { ped = lerLS("nms_pedidos_v1", []); rep(); } });
-    setInterval(function () { var t = (location.hash || "").replace("#", ""); if (t === "reppedidos" || t === "repcurva") rep(); }, 60000);
+    setInterval(function () { var t = (location.hash || "").replace("#", ""); if (t === "reppedidos" || t === "repcurva" || t === "repredist") rep(); }, 60000);
   }
-  window.RepUI = { curva: curva, pedidos: pedidos, init: function (renderFn) { App.render = renderFn; ligar(); } };
+  window.RepUI = { curva: curva, pedidos: pedidos, redistrib: redistrib, init: function (renderFn) { App.render = renderFn; ligar(); } };
 })();

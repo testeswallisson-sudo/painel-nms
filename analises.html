@@ -132,7 +132,24 @@
           <div class="pager"><button class="btn-csv" id="rcMais" type="button" style="display:none">Mostrar mais 200</button><span class="nota" id="rcNota"></span></div></article>
       </section>
 
-      <!-- ============ REPOSIÇÃO · PEDIDOS ============ -->
+      <!-- ============ REPOSIÇÃO · REDISTRIBUIÇÃO DE PARADOS ============ -->
+      <section class="modsec" id="s-repredist" style="display:none">
+        <div class="sec-head"><div><h2>Reposição lojas · Redistribuição de parados</h2><p>Produtos parados em uma loja que outras lojas estão vendendo: quanto enviar e para onde.</p></div>
+          <div class="filtros"><select class="select" id="rdLoja"></select><select class="select" id="rdMarca" style="display:none"></select><input class="select" id="rdBusca" type="search" placeholder="Buscar produto ou código…"><select class="select" id="rdOrd"><option value="qtd">Maior quantidade a transferir</option><option value="saldo">Maior saldo parado</option><option value="dsv">Mais dias sem vendas</option></select><button class="btn-csv" id="rdCsv" type="button">Exportar CSV</button></div></div>
+        <article class="card param-card"><div class="param-row">
+          <label>Parado há (dias)<input class="num-in num-in--lg" type="number" id="rdParado" min="1" step="1"></label>
+          <label>Dias de reposição<input class="num-in num-in--lg" type="number" id="rdDias" min="0" step="1"></label>
+          <label>Lead time (dias)<input class="num-in num-in--lg" type="number" id="rdLead" min="0" step="1"></label>
+          <label>Base da demanda<select class="select" id="rdBase"><option value="30">Últimos 30 dias</option><option value="dia">Dia atual</option><option value="sem">Semana atual</option><option value="3m">3 meses (atual + 2)</option></select></label>
+          <div class="segmented" id="rdSo"><button type="button" data-s="1" class="is-active">Só com destino</button><button type="button" data-s="0">Todos os parados</button></div></div></article>
+        <div id="rdAviso"></div>
+        <div class="row row--4" id="rdKpis"></div>
+        <article class="card table-card"><div class="table-card__head"><h2 class="card__title" id="rdTitulo">Parados</h2></div>
+          <div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th></th><th>Cód.</th><th>Descrição</th><th>Marca</th><th>Loja parada</th><th class="r">Saldo parado</th><th class="r">Dias sem vendas</th><th class="r">Demanda/dia (outras lojas)</th><th class="r">Transferir</th><th>Destinos (qtd)</th><th class="r">Fica na origem</th></tr></thead><tbody id="rdTab"></tbody></table></div>
+          <div class="pager"><button class="btn-csv" id="rdMais" type="button" style="display:none">Mostrar mais 200</button><span class="nota" id="rdNota"></span></div></article>
+      </section>
+
+<!-- ============ REPOSIÇÃO · PEDIDOS ============ -->
       <section class="modsec" id="s-reppedidos" style="display:none">
         <div class="sec-head"><div><h2>Reposição lojas · Pedidos</h2><p>As quantidades pedidas entram na análise de curva (descontadas da sugestão). Cada pedido expira em 48 h, ou você exclui na hora.</p></div>
           <div class="filtros"><select class="select" id="pdLoja"></select><input class="select" id="pdBusca" type="search" placeholder="Buscar produto ou código…"><button class="btn-csv" id="pdCsv" type="button">Exportar CSV</button></div></div>

@@ -9,7 +9,7 @@
   var N1 = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
   var MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
   var DOW = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
-  var TITULOS = { resumo: "Análises · Resumo", vendas: "Análises · Vendas", produtos: "Análises · Produtos", abc: "Análises · Curva ABC", estoque: "Análises · Estoque", estqprod: "Análises · Estoque por produto", alertas: "Análises · Cancelamentos e saldos", repcurva: "Reposição lojas · Análise de curva", reppedidos: "Reposição lojas · Pedidos" };
+  var TITULOS = { resumo: "Análises · Resumo", vendas: "Análises · Vendas", produtos: "Análises · Produtos", abc: "Análises · Curva ABC", estoque: "Análises · Estoque", estqprod: "Análises · Estoque por produto", alertas: "Análises · Cancelamentos e saldos", repcurva: "Reposição lojas · Análise de curva", reppedidos: "Reposição lojas · Pedidos", repredist: "Reposição lojas · Redistribuição de parados" };
 
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function setHTML(id, h) { var el = typeof id === "string" ? $(id) : id; if (el && el._h !== h) { el._h = h; el.innerHTML = h; } }
@@ -379,7 +379,7 @@
     var idade = Date.now() - new Date(A.gerado_em).getTime();
     $("sinal").className = "signal " + (idade > 3 * 3600e3 ? "is-stale" : "is-live");
     setTxt("sinalTxt", "gerado " + hhmm(A.gerado_em)); marcasSel();
-    ({ resumo: resumo, vendas: vendas, produtos: produtos, abc: abc, estoque: estoque, estqprod: estqprod, alertas: alertas, repcurva: function () { RepUI.curva(A); }, reppedidos: function () { RepUI.pedidos(A); } }[t] || resumo)();
+    ({ resumo: resumo, vendas: vendas, produtos: produtos, abc: abc, estoque: estoque, estqprod: estqprod, alertas: alertas, repcurva: function () { RepUI.curva(A); }, reppedidos: function () { RepUI.pedidos(A); }, repredist: function () { RepUI.redistrib(A); } }[t] || resumo)();
   }
 
   function carregar() {
