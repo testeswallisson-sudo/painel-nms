@@ -1,13 +1,13 @@
 window.ROBO = {
- "ultima_rodada_ok": "2026-10-06T23:09:07",
+ "ultima_rodada_ok": "2026-10-06T23:38:21",
  "consolidado": {
   "estoque": {
    "linhas": 119499,
-   "quando": "2026-10-06T23:08:42"
+   "quando": "2026-10-06T23:37:56"
   },
   "vendas": {
    "linhas": 23811,
-   "quando": "2026-10-06T23:03:43"
+   "quando": "2026-10-06T23:33:22"
   }
  },
  "portais": [
@@ -16,12 +16,12 @@ window.ROBO = {
    "vendas": {
     "status": "ok",
     "linhas": 14864,
-    "quando": "2026-10-06T23:01:35"
+    "quando": "2026-10-06T23:31:25"
    },
    "estoque": {
     "status": "ok",
     "linhas": 58868,
-    "quando": "2026-10-06T23:06:03"
+    "quando": "2026-10-06T23:35:23"
    }
   },
   {
@@ -29,12 +29,12 @@ window.ROBO = {
    "vendas": {
     "status": "ok",
     "linhas": 1787,
-    "quando": "2026-10-06T23:02:47"
+    "quando": "2026-10-06T23:32:31"
    },
    "estoque": {
     "status": "ok",
     "linhas": 24797,
-    "quando": "2026-10-06T23:07:17"
+    "quando": "2026-10-06T23:36:31"
    }
   },
   {
@@ -42,16 +42,64 @@ window.ROBO = {
    "vendas": {
     "status": "ok",
     "linhas": 7160,
-    "quando": "2026-10-06T23:03:43"
+    "quando": "2026-10-06T23:33:22"
    },
    "estoque": {
     "status": "ok",
     "linhas": 35834,
-    "quando": "2026-10-06T23:08:42"
+    "quando": "2026-10-06T23:37:56"
    }
   }
  ],
  "historico": [
+  {
+   "quando": "2026-10-06T23:37:56",
+   "tipo": "estoque",
+   "portal": "mv491",
+   "ok": true,
+   "linhas": 35834,
+   "detalhe": "exportado e salvo"
+  },
+  {
+   "quando": "2026-10-06T23:36:31",
+   "tipo": "estoque",
+   "portal": "mv449",
+   "ok": true,
+   "linhas": 24797,
+   "detalhe": "exportado e salvo"
+  },
+  {
+   "quando": "2026-10-06T23:35:23",
+   "tipo": "estoque",
+   "portal": "mv107",
+   "ok": true,
+   "linhas": 58868,
+   "detalhe": "exportado e salvo"
+  },
+  {
+   "quando": "2026-10-06T23:33:22",
+   "tipo": "vendas",
+   "portal": "mv491",
+   "ok": true,
+   "linhas": 7160,
+   "detalhe": "exportado e salvo"
+  },
+  {
+   "quando": "2026-10-06T23:32:31",
+   "tipo": "vendas",
+   "portal": "mv449",
+   "ok": true,
+   "linhas": 1787,
+   "detalhe": "exportado e salvo"
+  },
+  {
+   "quando": "2026-10-06T23:31:25",
+   "tipo": "vendas",
+   "portal": "mv107",
+   "ok": true,
+   "linhas": 14864,
+   "detalhe": "exportado e salvo"
+  },
   {
    "quando": "2026-10-06T23:08:42",
    "tipo": "estoque",
@@ -2403,61 +2451,13 @@ window.ROBO = {
    "ok": true,
    "linhas": null,
    "detalhe": "Nenhum registro retornado (a loja ainda não gerou dados) - arquivo anterior mantido"
-  },
-  {
-   "quando": "2026-10-04T11:10:17",
-   "tipo": "estoque",
-   "portal": "mv491",
-   "ok": true,
-   "linhas": 35924,
-   "detalhe": "exportado e salvo"
-  },
-  {
-   "quando": "2026-10-04T11:08:01",
-   "tipo": "estoque",
-   "portal": "mv449",
-   "ok": true,
-   "linhas": 24912,
-   "detalhe": "exportado e salvo"
-  },
-  {
-   "quando": "2026-10-04T11:06:19",
-   "tipo": "estoque",
-   "portal": "mv107",
-   "ok": true,
-   "linhas": 59000,
-   "detalhe": "exportado e salvo"
-  },
-  {
-   "quando": "2026-10-04T11:03:16",
-   "tipo": "vendas",
-   "portal": "mv491",
-   "ok": true,
-   "linhas": null,
-   "detalhe": "Nenhum registro retornado (a loja ainda não gerou dados) - arquivo anterior mantido"
-  },
-  {
-   "quando": "2026-10-04T11:02:18",
-   "tipo": "vendas",
-   "portal": "mv449",
-   "ok": true,
-   "linhas": null,
-   "detalhe": "Nenhum registro retornado (a loja ainda não gerou dados) - arquivo anterior mantido"
-  },
-  {
-   "quando": "2026-10-04T11:01:21",
-   "tipo": "vendas",
-   "portal": "mv107",
-   "ok": true,
-   "linhas": null,
-   "detalhe": "Nenhum registro retornado (a loja ainda não gerou dados) - arquivo anterior mantido"
   }
  ],
  "estado": "descansando",
  "portal": null,
  "etapa": null,
- "inicio_rodada": "2026-10-06T23:00:02",
- "fim_rodada": "2026-10-06T23:09:07",
+ "inicio_rodada": "2026-10-06T23:30:02",
+ "fim_rodada": "2026-10-06T23:38:21",
  "intervalo_horas": 1,
  "janela": [
   6,
@@ -2501,5 +2501,5 @@ window.ROBO = {
    "estoque": "ok"
   }
  ],
- "atualizado_em": "2026-10-06T23:09:07"
+ "atualizado_em": "2026-10-06T23:38:21"
 };
