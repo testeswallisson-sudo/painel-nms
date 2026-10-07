@@ -291,10 +291,16 @@
     sc.onerror = function () { epLoading[id] = 0; sc.remove(); epCache[id] = "erro"; render(); };
     document.head.appendChild(sc);
   }
+  function emPromo(p) { return !!p && p.split("|")[1] === "1"; }
+  function tdPromo(p) {
+    if (!p) return '<td><span style="color:var(--muted)">—</span></td>';
+    var a = p.split("|"), n = a[2] && +a[2] > 1 ? " (" + a[2] + " lojas)" : "";
+    return a[1] === "1" ? '<td><span class="badge badge--hired" title="Promoção vigente">' + esc(a[0]) + n + "</span></td>" : '<td><span style="color:var(--muted)" title="Campanha fora do período">' + esc(a[0]) + " · fora do período</span></td>";
+  }
   function epLinhas() {
     var E = A.estoque, id = ep.loja || "rede", D = window.ESTQ && window.ESTQ[id];
     if (!D) return null;
-    var q = ep.q.toLowerCase(), rows = D.rows.filter(function (r) { return (!ep.st || r[7] === ep.st) && okMarca(r[1]) && (!q || String(r[0]).toLowerCase().indexOf(q) >= 0 || String(r[1]).toLowerCase().indexOf(q) >= 0); });
+    var q = ep.q.toLowerCase(), rows = D.rows.filter(function (r) { return (!ep.st || (ep.st === "PROMO" ? emPromo(r[9]) : r[7] === ep.st)) && okMarca(r[1]) && (!q || String(r[0]).toLowerCase().indexOf(q) >= 0 || String(r[1]).toLowerCase().indexOf(q) >= 0); });
     var o = ep.ord, cmp = {
       valor: function (a, b) { return b[3] - a[3]; }, saldo: function (a, b) { return b[2] - a[2]; }, vendido: function (a, b) { return b[4] - a[4]; },
       cob: function (a, b) { return (a[6] == null ? 1e9 : a[6]) - (b[6] == null ? 1e9 : b[6]); }, dsv: function (a, b) { return (b[8] == null ? 1e9 : b[8]) - (a[8] == null ? 1e9 : a[8]); }, nome: function (a, b) { return String(a[0]).localeCompare(String(b[0]), "pt-BR"); }
@@ -312,23 +318,23 @@
     if (!E.cruzamento) av += '<div class="aviso-box">Sem cruzamento estoque × vendas' + (E.match_pct != null && E.match_pct < 50 ? " (só " + N0.format(E.match_pct) + "% dos produtos casam)" : "") + ": parados, rupturas e cobertura ficam desligados.</div>";
     else if (jan != null && jan < 7) av += '<div class="aviso-box">Só há ' + jan + " dia(s) de vendas coletados. \"Parado\" e \"cobertura\" ficam mais confiáveis conforme o histórico cresce (janela ideal: 30 dias).</div>";
     setHTML("epAviso", av);
-    if (epCache[id] === "erro") { setHTML("epTab", vazio(10, "Arquivo de produtos não encontrado — rode a coleta/Atualizar para gerá-lo.")); return; }
+    if (epCache[id] === "erro") { setHTML("epTab", vazio(11, "Arquivo de produtos não encontrado — rode a coleta/Atualizar para gerá-lo.")); return; }
     var r = epLinhas();
-    if (!r) { setHTML("epTab", vazio(10, "Carregando…")); epCarregar(id); return; }
-    var cont = { "": r.all.length }; r.all.forEach(function (x) { cont[x[7]] = (cont[x[7]] || 0) + 1; });
+    if (!r) { setHTML("epTab", vazio(11, "Carregando…")); epCarregar(id); return; }
+    var cont = { "": r.all.length }; r.all.forEach(function (x) { cont[x[7]] = (cont[x[7]] || 0) + 1; if (emPromo(x[9])) cont.PROMO = (cont.PROMO || 0) + 1; });
     var soma = function (st, i) { return r.all.reduce(function (a, x) { return a + ((!st || x[7] === st) ? x[i] : 0); }, 0); };
     var kp = [["Produtos com saldo", N0.format(r.all.filter(function (x) { return x[2] > 0; }).length), "valor " + curto(soma("", 3))],
       ["Parados (sem venda)", N0.format(cont.P || 0), "valor parado " + curto(soma("P", 3))],
       ["Rupturas", N0.format(cont.R || 0), "vendeu e está sem saldo"],
       ["Baixa cobertura (< 7 d)", N0.format(cont.B || 0), "risco de ruptura"]];
     setHTML("epKpis", kp.map(function (k) { return '<article class="card stat stat--sm"><h2 class="card__title">' + k[0] + '</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi">' + k[1] + '</div><div class="delta">' + k[2] + "</div></div></div></article>"; }).join(""));
-    var ordem = [["", "Todos"], ["P", "Parados"], ["R", "Rupturas"], ["B", "Baixa cobertura"], ["T", "Reposição"], ["E", "Excesso"], ["N", "Negativos"], ["O", "Normais"]];
+    var ordem = [["", "Todos"], ["PROMO", "Em promoção"], ["P", "Parados"], ["R", "Rupturas"], ["B", "Baixa cobertura"], ["T", "Reposição"], ["E", "Excesso"], ["N", "Negativos"], ["O", "Normais"]];
     setHTML("epChips", ordem.filter(function (o) { return !o[0] || cont[o[0]]; }).map(function (o) { return '<button type="button" data-st="' + o[0] + '" class="' + (ep.st === o[0] ? "is-active" : "") + '">' + o[1] + " <b>" + N0.format(cont[o[0]] || 0) + "</b></button>"; }).join(""));
     setTxt("epColRede", ep.loja ? "" : "Lojas (saldo / ruptura / parado)");
     var lim = r.rows.slice(0, ep.lim), rede = !ep.loja;
     setHTML("epTab", lim.map(function (x) {
-      return "<tr><td>" + nomeProd(x[0], x[1]) + "</td>" + tdMarca(x[1]) + '<td><span class="st st-' + x[7] + '">' + ESTQ_ST[x[7]] + '</span></td><td class="r">' + N0.format(x[2]) + '</td><td class="r">' + BRL.format(x[3]) + '</td><td class="r">' + N1.format(x[4]) + '</td><td class="r">' + BRL.format(x[5]) + '</td><td class="r">' + (x[6] == null ? "—" : N1.format(x[6]) + " d") + '</td><td class="r">' + (x[8] == null ? (E.cruzamento ? '<span style="color:var(--muted)">&gt; ' + (r.D.hist || 0) + " d</span>" : "—") : N0.format(x[8]) + " d") + '</td><td class="r">' + (rede ? x[9] + " / " + x[10] + " / " + x[11] : "") + "</td></tr>";
-    }).join("") || vazio(10, "Nenhum produto neste filtro."));
+      return "<tr><td>" + nomeProd(x[0], x[1]) + "</td>" + tdMarca(x[1]) + '<td><span class="st st-' + x[7] + '">' + ESTQ_ST[x[7]] + "</span></td>" + tdPromo(x[9]) + '<td class="r">' + N0.format(x[2]) + '</td><td class="r">' + BRL.format(x[3]) + '</td><td class="r">' + N1.format(x[4]) + '</td><td class="r">' + BRL.format(x[5]) + '</td><td class="r">' + (x[6] == null ? "—" : N1.format(x[6]) + " d") + '</td><td class="r">' + (x[8] == null ? (E.cruzamento ? '<span style="color:var(--muted)">&gt; ' + (r.D.hist || 0) + " d</span>" : "—") : N0.format(x[8]) + " d") + '</td><td class="r">' + (rede ? x[10] + " / " + x[11] + " / " + x[12] : "") + "</td></tr>";
+    }).join("") || vazio(11, "Nenhum produto neste filtro."));
     var nome = ep.loja ? (E.lojas.filter(function (l) { return l.arq === ep.loja; })[0] || {}).loja : "Todas as lojas";
     setTxt("epTitulo", nome + " — " + N0.format(r.rows.length) + " produto(s)");
     $("epMais").style.display = r.rows.length > ep.lim ? "" : "none";
