@@ -93,8 +93,8 @@
           <article class="card stat stat--sm"><h2 class="card__title">Rupturas (vendeu e está sem saldo)</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="eRup">—</div><div class="delta" id="eRupD">&nbsp;</div></div></div></article>
         </div>
         <article class="card table-card"><div class="table-card__head"><h2 class="card__title">Estoque por loja</h2></div>
-          <div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th>Loja</th><th>Portal</th><th class="r">Produtos</th><th class="r">Zerados</th><th class="r">Unidades</th><th class="r">Parado (valor)</th><th class="r">Rupturas</th><th class="r">Cobertura</th><th class="r">Valor</th></tr></thead><tbody id="eTab"></tbody><tfoot id="eFoot"></tfoot></table></div>
-          <p class="nota">Cobertura = unidades em estoque ÷ média diária de unidades vendidas no mês (em dias).</p></article>
+          <div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th>Loja</th><th>Portal</th><th class="r">Produtos</th><th class="r">Zerados</th><th class="r">Unidades</th><th class="r">Parado (valor)</th><th class="r">% parado</th><th class="r">Rupturas</th><th class="r">Cobertura</th><th class="r">Valor</th></tr></thead><tbody id="eTab"></tbody><tfoot id="eFoot"></tfoot></table></div>
+          <p class="nota">% parado = valor do estoque parado ÷ valor total do estoque da loja. Cobertura = unidades em estoque ÷ média diária de unidades vendidas no mês (em dias).</p></article>
         <div class="row row--even">
           <article class="card card--pad-table"><h2 class="card__title">Maiores valores em estoque (produto)</h2><div class="scroll"><table class="table table--data"><thead><tr><th>Produto</th><th>Marca</th><th class="r">Lojas</th><th class="r">Un.</th><th class="r">Valor</th></tr></thead><tbody id="eTop"></tbody></table></div></article>
           <article class="card card--pad-table"><h2 class="card__title">Estoque parado — maiores valores</h2><div class="scroll"><table class="table table--data"><thead><tr><th>Loja</th><th>Produto</th><th>Marca</th><th class="r">Un.</th><th class="r">Valor</th></tr></thead><tbody id="ePar2"></tbody></table></div></article>
@@ -176,11 +176,11 @@
           <article class="card stat stat--sm"><h2 class="card__title">Linhas com saldo negativo</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="aNL">—</div><div class="delta" id="aNLD">&nbsp;</div></div></div></article>
           <article class="card stat stat--sm"><h2 class="card__title">Valor do saldo negativo</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="aNV">—</div><div class="delta" id="aNVD">&nbsp;</div></div></div></article>
         </div>
-        <div class="row row--even">
+        <div class="row row--1">
           <article class="card card--pad-table"><h2 class="card__title">Cancelamentos por loja (mês)</h2><div class="scroll"><table class="table table--data"><thead><tr><th>Loja</th><th class="r">Linhas</th><th class="r">Valor</th></tr></thead><tbody id="aCLoja"></tbody></table></div></article>
           <article class="card card--pad-table"><h2 class="card__title">Saldo negativo por loja</h2><div class="scroll"><table class="table table--data"><thead><tr><th>Loja</th><th class="r">Linhas</th><th class="r">Unidades</th><th class="r">Valor</th></tr></thead><tbody id="aNLoja"></tbody></table></div></article>
         </div>
-        <div class="row row--even">
+        <div class="row row--1">
           <article class="card card--pad-table"><h2 class="card__title">Maiores cancelamentos do dia</h2><div class="scroll"><table class="table table--data"><thead><tr><th>Loja</th><th>Produto</th><th>Marca</th><th class="r">Qtd</th><th class="r">Valor</th></tr></thead><tbody id="aCLista"></tbody></table></div></article>
           <article class="card card--pad-table"><h2 class="card__title">Maiores saldos negativos</h2><div class="scroll"><table class="table table--data"><thead><tr><th>Loja</th><th>Produto</th><th>Marca</th><th class="r">Saldo</th><th class="r">Valor</th></tr></thead><tbody id="aNLista"></tbody></table></div></article>
         </div>

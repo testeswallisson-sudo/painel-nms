@@ -543,3 +543,4 @@ tr.subtab > td { background: rgba(0,0,0,.02); padding: 6px 10px 14px; }
   .btn-primary .ico { width: 18px; height: 18px; }
   .kpi { font-size: 20px; }
 }
+.row--1 { grid-template-columns: minmax(0, 1fr); }
