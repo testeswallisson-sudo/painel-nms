@@ -522,7 +522,9 @@ tr.subtab > td { background: rgba(0,0,0,.02); padding: 6px 10px 14px; }
   .tbl-3 { min-width: 0 !important; }
   .kpi { font-size: 22px; }
   .hero { grid-template-columns: 1fr; padding: 16px; min-height: 0; gap: 8px; }
-  .hero__mascot { height: 200px; }
+  .hero__mascot { display: flex; align-items: center; justify-content: center; height: 190px; width: 100%; overflow: hidden; }
+  .hero__mascot img { height: 180px !important; width: auto !important; max-width: 100% !important; max-height: 180px !important; object-fit: contain; flex: none; }
+  .hero__info { min-width: 0; }
   .hero__title { font-size: 22px; }
   .filtros { justify-content: flex-start; }
   .filtros .select, .filtros input.select, select, input[type=text], input[type=search], input[type=date], input[type=number] { max-width: 100%; font-size: 16px; }
