@@ -63,7 +63,7 @@
         <article class="card table-card"><div class="table-card__head"><h2 class="card__title">Faturamento por loja</h2></div>
           <div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th>Loja</th><th>Portal</th><th class="r">Linhas</th><th class="r">Itens</th><th class="r">Preço médio</th><th class="r">Cancelado</th><th class="r">Margem</th><th class="r">Part.</th><th class="r">Faturamento</th></tr></thead><tbody id="vTabLojas"></tbody><tfoot id="vFootLojas"></tfoot></table></div></article>
         <div class="row row--tri">
-          <article class="card card--pad-table"><h2 class="card__title">Tipos de venda (natureza)</h2><div class="scroll scroll--6"><table class="table table--data tbl-3"><thead><tr><th>Natureza</th><th class="r">Part.</th><th class="r">Faturamento</th></tr></thead><tbody id="vTipos"></tbody></table></div></article>
+          <article class="card card--pad-table"><h2 class="card__title">Tipos de operação (natureza)</h2><div class="scroll scroll--6"><table class="table table--data tbl-3"><thead><tr><th>Natureza</th><th class="r">Part.</th><th class="r">Valor</th></tr></thead><tbody id="vTipos"></tbody></table></div></article>
           <article class="card card--pad-table"><h2 class="card__title">Fornecedores</h2><div class="scroll scroll--6"><table class="table table--data tbl-3"><thead><tr><th>Fornecedor</th><th class="r">Part.</th><th class="r">Faturamento</th></tr></thead><tbody id="vForn"></tbody></table></div></article>
           <article class="card card--pad-table"><h2 class="card__title">Vendedores</h2><div class="scroll scroll--6"><table class="table table--data tbl-3"><thead><tr><th>Vendedor</th><th class="r">Linhas</th><th class="r">Faturamento</th></tr></thead><tbody id="vVend"></tbody></table></div></article>
         </div>
@@ -117,11 +117,13 @@
 <!-- ============ REPOSIÇÃO · ANÁLISE DE CURVA ============ -->
       <section class="modsec" id="s-repcurva" style="display:none">
         <div class="sec-head"><div><h2>Reposição lojas · Análise de curva</h2><p>O que repor em cada loja, cruzando saldo, vendas dos 3 meses, lead time e pedidos já feitos.</p></div>
-          <div class="filtros"><select class="select" id="rcLoja"></select><select class="select" id="rcMarca" style="display:none"></select><input class="select" id="rcBusca" type="search" placeholder="Buscar produto ou código…"><select class="select" id="rcOrd"><option value="sug">Maior sugestão</option><option value="mes">Mais vendido no mês</option><option value="dsv">Mais dias sem vendas</option><option value="nome">Nome</option></select><button class="btn-csv" id="rcCsv" type="button">Exportar CSV</button></div></div>
+          <div class="filtros"><select class="select" id="rcLoja"></select><select class="select" id="rcMarca" style="display:none"></select><input class="select" id="rcBusca" type="search" placeholder="Buscar produto ou código…"><select class="select" id="rcAbc"><option value="">TODAS AS CURVAS</option><option value="A">Curva A</option><option value="B">Curva B</option><option value="C">Curva C</option><option value="-">Sem venda no período</option></select><select class="select" id="rcOrd"><option value="sug">Maior sugestão</option><option value="mes">Mais vendido no mês</option><option value="dsv">Mais dias sem vendas</option><option value="nome">Nome</option></select><button class="btn-csv" id="rcCsv" type="button">Exportar CSV</button></div></div>
         <article class="card param-card"><div class="param-row">
           <label>Dias de reposição<input class="num-in num-in--lg" type="number" id="rcDias" min="0" step="1"></label>
           <label>Lead time (dias)<input class="num-in num-in--lg" type="number" id="rcLead" min="0" step="1"></label>
-          <label>Base da demanda<select class="select" id="rcBase"><option value="30">Últimos 30 dias</option><option value="dia">Dia atual</option><option value="sem">Semana atual</option><option value="3m">3 meses (atual + 2)</option></select></label>
+          <label>Vendas de<input class="num-in num-in--lg" type="date" id="rcDe" style="width:150px"></label>
+          <label>até<input class="num-in num-in--lg" type="date" id="rcAte" style="width:150px"></label>
+          <label>Base da demanda<select class="select" id="rcBase"><option value="30">Últimos 30 dias</option><option value="dia">Dia atual</option><option value="sem">Semana atual</option><option value="3m">3 meses (atual + 2)</option><option value="per">Período (datas De/Até)</option></select></label>
           <div class="segmented" id="rcVisao"><button type="button" data-v="lp" class="is-active">Loja × produto</button><button type="button" data-v="prod">Por produto (todas as lojas)</button></div>
           <div class="segmented" id="rcSo"><button type="button" data-s="1" class="is-active">Só quem precisa repor</button><button type="button" data-s="0">Todos</button></div></div>
           <p class="nota" id="rcFormula" style="margin:10px 0 0"></p></article>
@@ -140,7 +142,7 @@
           <label>Parado há (dias)<input class="num-in num-in--lg" type="number" id="rdParado" min="1" step="1"></label>
           <label>Dias de reposição<input class="num-in num-in--lg" type="number" id="rdDias" min="0" step="1"></label>
           <label>Lead time (dias)<input class="num-in num-in--lg" type="number" id="rdLead" min="0" step="1"></label>
-          <label>Base da demanda<select class="select" id="rdBase"><option value="30">Últimos 30 dias</option><option value="dia">Dia atual</option><option value="sem">Semana atual</option><option value="3m">3 meses (atual + 2)</option></select></label>
+          <label>Base da demanda<select class="select" id="rdBase"><option value="30">Últimos 30 dias</option><option value="dia">Dia atual</option><option value="sem">Semana atual</option><option value="3m">3 meses (atual + 2)</option><option value="per">Período (datas De/Até)</option></select></label>
           <div class="segmented" id="rdSo"><button type="button" data-s="1" class="is-active">Só com destino</button><button type="button" data-s="0">Todos os parados</button></div></div></article>
         <div id="rdAviso"></div>
         <div class="row row--4" id="rdKpis"></div>
@@ -167,7 +169,61 @@
           <div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th>Criado em</th><th>Expira em</th><th>Loja</th><th>Cód.</th><th>Produto</th><th class="r">Qtd</th><th class="r"></th></tr></thead><tbody id="pdTab"></tbody></table></div></article>
       </section>
 
-<!-- ============ CANCELAMENTOS E SALDOS ============ -->
+<!-- ============ ENCARTE E PROMOÇÕES · CAMPANHAS ============ -->
+      <section class="modsec" id="s-promocampanhas" style="display:none">
+        <div class="sec-head"><div><h2>Encarte e promoções · Campanhas</h2><p id="pcSub">Faturamento dos itens de cada campanha (produtos × lojas em campanha, dentro do período dela) comparado com os dias anteriores.</p></div>
+          <div class="filtros"><select class="select" id="pcStatus"><option value="">TODAS AS CAMPANHAS</option><option value="vigente">Vigentes</option><option value="encerrada">Encerradas</option><option value="futura">Futuras</option></select><input class="select" id="pcBusca" type="search" placeholder="Buscar campanha…"></div></div>
+        <div id="pcAviso"></div>
+        <div class="row row--4" id="pcKpis"></div>
+        <article class="card card--pad-table"><h2 class="card__title">Campanhas <span class="kpi-mini">clique para ver o detalhe</span></h2><div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th>Campanha</th><th>Período</th><th>Situação</th><th class="r">Produtos</th><th class="r">Lojas</th><th class="r">Faturamento</th><th class="r">Qtd</th><th class="r">Fat./dia</th><th class="r">Antes (fat./dia)</th><th class="r">Variação</th><th class="r">% do fat. da rede</th></tr></thead><tbody id="pcTab"></tbody></table></div></article>
+        <div id="pcDet" style="display:flex;flex-direction:column;gap:22px"></div>
+        <p class="nota" id="pcNota"></p>
+      </section>
+
+      <!-- ============ ENCARTE E PROMOÇÕES · MAIORES FATURAMENTOS ============ -->
+      <section class="modsec" id="s-promotop" style="display:none">
+        <div class="sec-head"><div><h2>Encarte e promoções · Maiores faturamentos</h2><p id="ptSub"></p></div><div class="filtros"><select class="select" id="ptCamp"></select><input class="select" id="ptBusca" type="search" placeholder="Buscar produto ou marca…"></div></div>
+        <div id="ptAviso"></div>
+        <div class="row row--4" id="ptKpis"></div>
+        <article class="card card--pad-table"><h2 class="card__title">Produtos com maior faturamento</h2><div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th>Produto</th><th>Marca</th><th class="r">Faturamento</th><th class="r">Qtd</th><th class="r">Part.</th></tr></thead><tbody id="ptProd"></tbody></table></div></article>
+        <div class="row row--even">
+          <article class="card card--pad-table"><h2 class="card__title">Marcas</h2><div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th>Marca</th><th class="r">Produtos</th><th class="r">Faturamento</th><th class="r">Part.</th></tr></thead><tbody id="ptMarca"></tbody></table></div></article>
+          <article class="card card--pad-table"><h2 class="card__title">Lojas</h2><div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th>Loja</th><th class="r">Faturamento</th><th class="r">Qtd</th><th class="r">Part.</th></tr></thead><tbody id="ptLoja"></tbody></table></div></article>
+        </div>
+        <p class="nota" id="ptNota"></p>
+      </section>
+
+      <!-- ============ ENCARTE E PROMOÇÕES · PRÓXIMO ENCARTE ============ -->
+      <section class="modsec" id="s-promoproximo" style="display:none">
+        <div class="sec-head"><div><h2>Encarte e promoções · Próximo encarte</h2><p id="pxSub"></p></div>
+          <div class="filtros"><select class="select" id="pxFoco"><option value="A">Curva A (destaques)</option><option value="B">Curva B</option><option value="C">Curva C</option><option value="S">Sem giro (liquidar)</option><option value="EXC">Excesso de estoque (&gt; 45 d)</option><option value="">Todos</option></select><select class="select" id="pxMarca"></select><input class="select" id="pxBusca" type="search" placeholder="Buscar produto ou código…"><select class="select" id="pxOrd"><option value="fat">Maior faturamento 30 d</option><option value="valor">Maior valor em estoque</option><option value="vpar">Maior valor parado (lojas)</option><option value="cob">Maior cobertura</option><option value="mg">Maior margem</option></select><button class="btn-csv" id="pxCsv" type="button">Exportar CSV</button></div></div>
+        <article class="card param-card"><div class="param-row">
+          <label>Cobertura mínima (dias)<input class="num-in num-in--lg" type="number" id="pxCob" min="0" step="1" value="0"></label>
+          <div class="segmented" id="pxPromo"><button type="button" data-v="0" class="is-active">Todos</button><button type="button" data-v="1">Ocultar quem já está em promoção</button></div></div>
+          <p class="nota" id="pxFormula" style="margin:10px 0 0"></p></article>
+        <div id="pxAviso"></div>
+        <div class="row row--4" id="pxKpis"></div>
+        <article class="card table-card"><div class="table-card__head"><h2 class="card__title" id="pxTitulo">Produtos</h2></div>
+          <div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th>Produto</th><th>Marca</th><th>Curva</th><th class="r">Fat. 30 d</th><th class="r">Qtd 30 d</th><th class="r">Lojas vendendo</th><th class="r">Saldo (rede)</th><th class="r">Cobertura</th><th class="r">Margem</th><th class="r">Preço médio</th><th class="r">Lojas c/ estoque parado</th><th class="r">Valor parado</th><th class="r">Ruptura (lojas)</th><th>Última promoção</th><th>Leitura</th></tr></thead><tbody id="pxTab"></tbody></table></div>
+          <div class="pager"><button class="btn-csv" id="pxMais" type="button" style="display:none">Mostrar mais 200</button><span class="nota" id="pxNota"></span></div></article>
+      </section>
+
+      <!-- ============ OUTRAS OPERAÇÕES (fora do faturamento) ============ -->
+      <section class="modsec" id="s-outras" style="display:none">
+        <div class="sec-head"><div><h2>Outras operações</h2><p id="oSub"></p></div><div class="filtros"><select class="select" id="oNat"></select><div class="segmented" id="oPeriodo"><button type="button" data-p="dia" class="is-active">Hoje</button><button type="button" data-p="mes">Mês</button></div></div></div>
+        <div class="row row--4">
+          <article class="card stat stat--sm"><h2 class="card__title">Valor movimentado (fora do faturamento)</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="oVal">—</div><div class="delta" id="oValD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Quantidade (un.)</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="oQtd">—</div><div class="delta" id="oQtdD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Tipos de operação</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="oTipos">—</div><div class="delta" id="oTiposD">&nbsp;</div></div></div></article>
+          <article class="card stat stat--sm"><h2 class="card__title">Faturamento (só vendas)</h2><div class="stat__bottom"><div class="stat__num"><div class="kpi" id="oFat">—</div><div class="delta" id="oFatD">&nbsp;</div></div></div></article>
+        </div>
+        <article class="card card--pad-table"><h2 class="card__title">Por tipo de operação <span class="kpi-mini">clique para filtrar</span></h2><div class="scroll"><table class="table table--data"><thead><tr><th>Natureza</th><th class="r">Linhas</th><th class="r">Quantidade</th><th class="r">Valor</th><th class="r">% do faturamento</th></tr></thead><tbody id="oTab"></tbody></table></div></article>
+        <article class="card card--pad-table"><h2 class="card__title" id="oTLoja">Por loja</h2><div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th>Loja</th><th class="r">Linhas</th><th class="r">Quantidade</th><th class="r">Valor</th></tr></thead><tbody id="oLoja"></tbody></table></div></article>
+        <article class="card card--pad-table"><h2 class="card__title" id="oTProd">Principais produtos</h2><div class="scroll scroll--tall"><table class="table table--data"><thead><tr><th>Produto</th><th class="r">Quantidade</th><th class="r">Valor</th></tr></thead><tbody id="oProd"></tbody></table></div></article>
+        <p class="nota" id="oNota"></p>
+      </section>
+
+      <!-- ============ CANCELAMENTOS E SALDOS ============ -->
       <section class="modsec" id="s-alertas" style="display:none">
         <div class="sec-head"><div><h2>Cancelamentos e saldos negativos</h2><p>O que precisa de revisão no Linx.</p></div><div class="filtros"><select class="select sel-marca" style="display:none"></select></div></div>
         <div class="row row--4">
@@ -192,6 +248,7 @@
 <script src="nav.js"></script>
 <script src="analises_data.js"></script>
 <script src="reposicao_ui.js"></script>
+<script src="promocoes_ui.js"></script>
 <script src="analises_ui.js"></script>
 </body>
 </html>

@@ -74,7 +74,7 @@
     } else { setHTML($("tEstoque"), '<tr><td colspan="8">Sem dados de estoque.</td></tr>'); setHTML($("fEstoque"), ""); }
 
     /* naturezas */
-    setHTML($("tNat"), V && V.naturezas.length ? V.naturezas.map(function (n) { return "<tr><td>" + esc(n.natureza) + '</td><td class="r">' + N0.format(n.linhas) + '</td><td class="r">' + BRL.format(n.faturamento) + "</td></tr>"; }).join("") : '<tr><td colspan="3">—</td></tr>');
+    setHTML($("tNat"), V && V.naturezas.length ? V.naturezas.map(function (n) { return "<tr" + (n.venda === false ? ' style="color:var(--muted)"' : "") + "><td>" + esc(n.natureza) + (n.venda === false ? ' <span class="kpi-mini">fora do faturamento</span>' : "") + '</td><td class="r">' + N0.format(n.linhas) + '</td><td class="r">' + BRL.format(n.faturamento) + "</td></tr>"; }).join("") : '<tr><td colspan="3">—</td></tr>');
 
     /* canceladas e negativos */
     var canc = V && V.canceladas || [], negs = E && E.negativos || [];

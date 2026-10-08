@@ -22,7 +22,12 @@
       { id: "an-abc", href: "analises.html#abc", icone: "abc", txt: "Curva ABC" },
       { id: "an-estoque", href: "analises.html#estoque", icone: "box", txt: "Estoque" },
       { id: "an-estqprod", href: "analises.html#estqprod", icone: "box", txt: "Estoque por produto" },
+      { id: "an-outras", href: "analises.html#outras", icone: "tag", txt: "Outras operações" },
       { id: "an-alertas", href: "analises.html#alertas", icone: "warn", txt: "Cancelamentos e saldos" }] },
+    { titulo: "Módulo · Encarte e promoções", itens: [
+      { id: "an-promocampanhas", href: "analises.html#promocampanhas", icone: "tag", txt: "Campanhas e faturamento" },
+      { id: "an-promotop", href: "analises.html#promotop", icone: "chart", txt: "Produtos, marcas e lojas" },
+      { id: "an-promoproximo", href: "analises.html#promoproximo", icone: "abc", txt: "Próximo encarte" }] },
     { titulo: "Módulo · Reposição lojas", itens: [
       { id: "an-repcurva", href: "analises.html#repcurva", icone: "abc", txt: "Análise de curva" },
       { id: "an-repredist", href: "analises.html#repredist", icone: "box", txt: "Redistribuição de parados" },

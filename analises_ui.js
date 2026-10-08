@@ -9,7 +9,7 @@
   var N1 = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
   var MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
   var DOW = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
-  var TITULOS = { resumo: "Análises · Resumo", vendas: "Análises · Vendas", produtos: "Análises · Produtos", abc: "Análises · Curva ABC", estoque: "Análises · Estoque", estqprod: "Análises · Estoque por produto", alertas: "Análises · Cancelamentos e saldos", repcurva: "Reposição lojas · Análise de curva", reppedidos: "Reposição lojas · Pedidos", repredist: "Reposição lojas · Redistribuição de parados" };
+  var TITULOS = { resumo: "Análises · Resumo", vendas: "Análises · Vendas", produtos: "Análises · Produtos", abc: "Análises · Curva ABC", estoque: "Análises · Estoque", estqprod: "Análises · Estoque por produto", outras: "Análises · Outras operações", promocampanhas: "Encarte e promoções · Campanhas", promotop: "Encarte e promoções · Maiores faturamentos", promoproximo: "Encarte e promoções · Próximo encarte", alertas: "Análises · Cancelamentos e saldos", repcurva: "Reposição lojas · Análise de curva", reppedidos: "Reposição lojas · Pedidos", repredist: "Reposição lojas · Redistribuição de parados" };
 
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function setHTML(id, h) { var el = typeof id === "string" ? $(id) : id; if (el && el._h !== h) { el._h = h; el.innerHTML = h; } }
@@ -158,7 +158,7 @@
     var mx = Math.max.apply(null, B.por_loja.map(function (l) { return l.fat; }).concat([1]));
     setHTML("vTabLojas", B.por_loja.map(function (l) { return "<tr><td>" + esc(l.loja) + "</td><td>" + esc(l.portal) + '</td><td class="r">' + N0.format(l.linhas) + '</td><td class="r">' + N1.format(l.itens) + '</td><td class="r">' + BRL.format(l.preco_medio) + '</td><td class="r">' + (l.canc_valor ? BRL.format(l.canc_valor) : "—") + '</td><td class="r">' + (l.margem_pct == null ? "—" : N1.format(l.margem_pct) + "%") + '</td><td class="r">' + N1.format(l.part) + '%</td><td class="r">' + BRL.format(l.fat) + '<span class="bar-cell" style="width:' + Math.round(l.fat / mx * 70) + 'px"></span></td></tr>'; }).join(""));
     setHTML("vFootLojas", '<tr><td>Total (' + B.lojas + ' lojas)</td><td></td><td class="r">' + N0.format(B.linhas) + '</td><td class="r">' + N1.format(B.itens) + '</td><td class="r">' + BRL.format(B.preco_medio) + '</td><td class="r">' + BRL.format(B.canc_valor) + '</td><td class="r">' + (B.margem_pct == null ? "—" : N1.format(B.margem_pct) + "%") + '</td><td class="r">100%</td><td class="r">' + BRL.format(B.fat) + "</td></tr>");
-    setHTML("vTipos", B.tipos.map(function (t) { return '<tr><td title="' + esc(t.natureza) + '">' + esc(t.natureza) + '</td><td class="r">' + N1.format(t.part) + '%</td><td class="r">' + BRL.format(t.fat) + "</td></tr>"; }).join("") || vazio(3, "Coluna de natureza não encontrada."));
+    setHTML("vTipos", B.tipos.map(function (t) { return '<tr' + (t.venda ? "" : ' style="color:var(--muted)"') + '><td title="' + esc(t.natureza) + (t.venda ? "" : " (fora do faturamento)") + '">' + esc(t.natureza) + (t.venda ? "" : ' <span class="kpi-mini">fora do fat.</span>') + '</td><td class="r">' + N1.format(t.part) + '%</td><td class="r">' + BRL.format(t.fat) + "</td></tr>"; }).join("") || vazio(3, "Sem dados."));
     setHTML("vForn", B.fornecedores.map(function (t) { return '<tr><td title="' + esc(t.nome) + '">' + esc(t.nome) + '</td><td class="r">' + N1.format(t.part) + '%</td><td class="r">' + BRL.format(t.fat) + "</td></tr>"; }).join("") || vazio(3, "Coluna de fornecedor não encontrada."));
     setHTML("vVend", B.vendedores.map(function (t) { return '<tr><td title="' + esc(t.nome) + '">' + esc(t.nome) + '</td><td class="r">' + N0.format(t.linhas) + '</td><td class="r">' + BRL.format(t.fat) + "</td></tr>"; }).join("") || vazio(3, "Coluna de vendedor não encontrada."));
   }
@@ -365,6 +365,34 @@
     setHTML("eRup2", E.rupturas.filter(function (p) { return okMarca(p.chave); }).slice(0, MARCA ? 100 : 30).map(function (p) { return "<tr><td>" + esc(p.loja) + "</td><td>" + nomeProd(p.produto, p.chave) + "</td>" + tdMarca(p.chave) + '<td class="r">' + N0.format(p.saldo) + '</td><td class="r">' + N1.format(p.vendido) + '</td><td class="r">' + BRL.format(p.fat) + "</td></tr>"; }).join("") || vazio(6, E.cruzamento ? "Nenhuma." : "Precisa de vendas no mês."));
   }
 
+  var oSt = { p: "dia", nat: "" };
+  function outras() {
+    var B = oSt.p === "dia" ? A.dia : A.mes_bloco, nome = oSt.p === "dia" ? "hoje (" + A.data_ref.split("-").reverse().join("/") + ")" : MESES[+A.mes.split("-")[1] - 1];
+    setTxt("oSub", "Período: " + nome + " · operações de saída que NÃO são venda (devolução, bonificação, baixas…) — ficam fora do faturamento");
+    var O = (B && B.outras) || [], sel = $("oNat");
+    var opt = '<option value="">TODOS OS TIPOS</option>' + O.map(function (o) { return '<option value="' + esc(o.natureza) + '">' + esc(o.natureza) + "</option>"; }).join("");
+    if (sel._o !== opt) { sel._o = opt; sel.innerHTML = opt; }
+    if (oSt.nat && !O.some(function (o) { return o.natureza === oSt.nat; })) oSt.nat = "";
+    sel.value = oSt.nat;
+    var tv = O.reduce(function (a, o) { return a + o.valor; }, 0), tq = O.reduce(function (a, o) { return a + o.qtd; }, 0), tl = O.reduce(function (a, o) { return a + o.linhas; }, 0);
+    setTxt("oVal", BRL.format(tv)); setTxt("oValD", N0.format(tl) + " linhas");
+    setTxt("oQtd", N0.format(tq)); setTxt("oQtdD", "unidades movimentadas");
+    setTxt("oTipos", String(O.length)); setTxt("oTiposD", "naturezas fora do faturamento");
+    setTxt("oFat", B ? BRL.format(B.fat) : "—"); setTxt("oFatD", B && B.fat ? N1.format(tv / B.fat * 100) + "% em outras operações" : "");
+    setHTML("oTab", O.map(function (o) { return '<tr class="lnk' + (o.natureza === oSt.nat ? " is-exp" : "") + '" data-n="' + esc(o.natureza) + '"><td>' + esc(o.natureza) + '</td><td class="r">' + N0.format(o.linhas) + '</td><td class="r">' + N0.format(o.qtd) + '</td><td class="r">' + BRL.format(o.valor) + '</td><td class="r">' + N1.format(o.part_fat) + "%</td></tr>"; }).join("") || vazio(5, "Sem outras operações neste período."));
+    var use = oSt.nat ? O.filter(function (o) { return o.natureza === oSt.nat; }) : O, lm = {}, pm = {};
+    use.forEach(function (o) {
+      o.lojas.forEach(function (l) { var x = lm[l.loja] = lm[l.loja] || { loja: l.loja, linhas: 0, qtd: 0, valor: 0 }; x.linhas += l.linhas; x.qtd += l.qtd; x.valor += l.valor; });
+      o.produtos.forEach(function (p) { var x = pm[p.chave] = pm[p.chave] || { produto: p.produto, chave: p.chave, qtd: 0, valor: 0 }; x.qtd += p.qtd; x.valor += p.valor; });
+    });
+    var L = Object.keys(lm).map(function (k) { return lm[k]; }).sort(function (a, b) { return Math.abs(b.valor) - Math.abs(a.valor); });
+    var P = Object.keys(pm).map(function (k) { return pm[k]; }).sort(function (a, b) { return Math.abs(b.valor) - Math.abs(a.valor); }).slice(0, 60);
+    setTxt("oTLoja", "Por loja" + (oSt.nat ? " — " + oSt.nat : " — todos os tipos")); setTxt("oTProd", "Principais produtos" + (oSt.nat ? " — " + oSt.nat : " — todos os tipos"));
+    setHTML("oLoja", L.map(function (l) { return "<tr><td>" + esc(l.loja) + '</td><td class="r">' + N0.format(l.linhas) + '</td><td class="r">' + N0.format(l.qtd) + '</td><td class="r">' + BRL.format(l.valor) + "</td></tr>"; }).join("") || vazio(4, "Sem dados."));
+    setHTML("oProd", P.map(function (p) { return "<tr><td>" + nomeProd(p.produto, p.chave) + '</td><td class="r">' + N0.format(p.qtd) + '</td><td class="r">' + BRL.format(p.valor) + "</td></tr>"; }).join("") || vazio(3, "Sem dados."));
+    setTxt("oNota", "Fazem parte do faturamento apenas as naturezas definidas em NATUREZAS_VENDA no .env (padrão: [S] VENDA MERCADORIA MV- OK e [S] VENDA MERCADORIA MV). Produtos: top 40 por tipo em cada dia.");
+  }
+
   function alertas() {
     var D = A.dia, M = A.mes_bloco, E = A.estoque, C = A.cancelamentos || {};
     setTxt("aCD", D ? BRL.format(D.canc_valor) : "—"); setTxt("aCDD", D ? D.canc_linhas + " linhas · " + N1.format(D.canc_pct) + "% do bruto" : "sem vendas hoje");
@@ -386,7 +414,7 @@
     var idade = Date.now() - new Date(A.gerado_em).getTime();
     $("sinal").className = "signal " + (idade > 3 * 3600e3 ? "is-stale" : "is-live");
     setTxt("sinalTxt", "gerado " + hhmm(A.gerado_em)); marcasSel();
-    ({ resumo: resumo, vendas: vendas, produtos: produtos, abc: abc, estoque: estoque, estqprod: estqprod, alertas: alertas, repcurva: function () { RepUI.curva(A); }, reppedidos: function () { RepUI.pedidos(A); }, repredist: function () { RepUI.redistrib(A); } }[t] || resumo)();
+    ({ resumo: resumo, vendas: vendas, produtos: produtos, abc: abc, estoque: estoque, estqprod: estqprod, outras: outras, alertas: alertas, promocampanhas: function () { PromoUI.campanhas(A); }, promotop: function () { PromoUI.top(A); }, promoproximo: function () { PromoUI.proximo(A); }, repcurva: function () { RepUI.curva(A); }, reppedidos: function () { RepUI.pedidos(A); }, repredist: function () { RepUI.redistrib(A); } }[t] || resumo)();
   }
 
   function carregar() {
@@ -397,6 +425,9 @@
     document.head.appendChild(s);
   }
   $("btnAtualizar").addEventListener("click", carregar);
+  $("oPeriodo").addEventListener("click", function (e) { var b = e.target.closest("button[data-p]"); if (!b) return; oSt.p = b.getAttribute("data-p"); [].forEach.call($("oPeriodo").children, function (x) { x.classList.toggle("is-active", x === b); }); render(); });
+  $("oNat").addEventListener("change", function () { oSt.nat = this.value; render(); });
+  $("oTab").addEventListener("click", function (e) { var r = e.target.closest("tr[data-n]"); if (!r) return; var n = r.getAttribute("data-n"); oSt.nat = oSt.nat === n ? "" : n; render(); });
   $("vPeriodo").addEventListener("click", function (e) { var b = e.target.closest("button[data-p]"); if (!b) return; per.v = b.getAttribute("data-p"); [].forEach.call($("vPeriodo").children, function (x) { x.classList.toggle("is-active", x === b); }); render(); });
   $("pPeriodo").addEventListener("click", function (e) { var b = e.target.closest("button[data-p]"); if (!b) return; per.p = b.getAttribute("data-p"); [].forEach.call($("pPeriodo").children, function (x) { x.classList.toggle("is-active", x === b); }); render(); });
   $("pBusca").addEventListener("input", function (e) { busca = e.target.value; render(); });
@@ -416,6 +447,7 @@
   $("epMais").addEventListener("click", function () { ep.lim += 200; render(); });
   $("epCsv").addEventListener("click", function () { var r = A && epLinhas(); if (!r) return; csvBaixar("estoque_produto_" + (ep.loja || "rede") + ".csv", ["Produto", "Código", "Marca", "Situação", "Saldo", "Valor", "Vendido", "Faturamento", "Cobertura (dias)", "Dias sem vendas"], r.rows.map(function (x) { return [x[0], x[1], mar(x[1]), ESTQ_ST[x[7]], x[2], x[3], x[4], x[5], x[6], x[8] == null ? "> " + (r.D.hist || 0) : x[8]]; })); });
   if (window.RepUI) RepUI.init(render);
+  if (window.PromoUI) PromoUI.init(render);
   window.addEventListener("hashchange", function () { render(); $("conteudo").parentElement.scrollTop = 0; });
   render(); carregar(); setInterval(carregar, 30000);
 })();

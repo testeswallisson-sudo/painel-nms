@@ -25,7 +25,7 @@
   function gravarLS(k, v) { mem[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } }
   var P = lerLS("nms_repo_params", null) || { dias: 30, lead: 7, base: "30" };
   if (P.parado == null) P.parado = 30;
-  var R = { loja: "", marca: "", q: "", visao: "lp", so: true, ord: "sug", lim: 200, exp: {} };
+  var R = { loja: "", marca: "", abc: "", q: "", visao: "lp", so: true, ord: "sug", lim: 200, exp: {} };
   var RD = { loja: "", marca: "", q: "", ord: "qtd", so: true, lim: 200, exp: {} };
   var PD = { f: "ativos", q: "", loja: "", ok: "" };
 
@@ -55,16 +55,57 @@
     return false;
   }
 
+  /* ---------- período de vendas (De/Até) + curva ABC ---------- */
+  var PER = null, perCarga = null;
+  function nrm(t) { return String(t == null ? "" : t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim().toUpperCase(); }
+  function datasAbc() { return (A && A.abc_datas) || []; }
+  function ajustarPeriodo() {
+    var ds = datasAbc(); if (!ds.length) return;
+    if (!P.de || P.de < ds[0] || P.de > ds[ds.length - 1]) P.de = ds[Math.max(0, ds.length - 30)];
+    if (!P.ate || P.ate > ds[ds.length - 1] || P.ate < ds[0]) P.ate = ds[ds.length - 1];
+    if (P.de > P.ate) P.de = P.ate;
+  }
+  function perDatas() { return datasAbc().filter(function (d) { return d >= P.de && d <= P.ate; }); }
+  function classif(itens) {   /* itens: [[chave, fat]] -> {chave: "A"|"B"|"C"} */
+    itens.sort(function (a, b) { return b[1] - a[1]; });
+    var tot = itens.reduce(function (a, x) { return a + x[1]; }, 0) || 1, ac = 0, out = {};
+    itens.forEach(function (x) { var antes = ac / tot; ac += x[1]; out[x[0]] = antes < 0.8 ? "A" : antes < 0.95 ? "B" : "C"; });
+    return out;
+  }
+  function perCalc(ds) {
+    var q = {}, abc = {}, fl = {}, rede = {};
+    ds.forEach(function (d) { var D = window.ABCD[d]; if (!D) return;
+      for (var l in D.l) { var ln = nrm(l); for (var k in D.l[l]) { var v = D.l[l][k], c = ln + "|" + k; q[c] = (q[c] || 0) + v[0]; var o = fl[ln] = fl[ln] || {}; o[k] = (o[k] || 0) + v[1]; rede[k] = (rede[k] || 0) + v[1]; } } });
+    for (var ln2 in fl) { var it = []; for (var k2 in fl[ln2]) if (fl[ln2][k2] > 0) it.push([k2, fl[ln2][k2]]); var cl = classif(it); for (var k3 in cl) abc[ln2 + "|" + k3] = cl[k3]; }
+    var ri = []; for (var k4 in rede) if (rede[k4] > 0) ri.push([k4, rede[k4]]);
+    PER = { chave: P.de + "|" + P.ate, q: q, abc: abc, rede: classif(ri), dias: ds.length };
+  }
+  function perPronto() {
+    ajustarPeriodo();
+    var chave = P.de + "|" + P.ate;
+    if (PER && PER.chave === chave && PER.stamp === (A && A.gerado_em)) return true;
+    var ds = perDatas(), falta = ds.filter(function (d) { return !(window.ABCD && window.ABCD[d]); });
+    if (!falta.length) { perCalc(ds); PER.stamp = A.gerado_em; return true; }
+    if (perCarga === chave) return false;
+    perCarga = chave; var n = falta.length; window.ABCD = window.ABCD || {};
+    falta.forEach(function (d) { var sc = document.createElement("script"); sc.src = "abc_dias/" + d + ".js?t=" + encodeURIComponent(A.gerado_em);
+      var fim = function () { sc.remove(); if (--n === 0) { perCarga = null; if (window.App) App.render(); } };
+      sc.onload = fim; sc.onerror = fim; document.head.appendChild(sc); });
+    return false;
+  }
+  function badgeAbc(c) { return c ? '<span class="st st-' + (c === "A" ? "T" : c === "B" ? "O" : "P") + '" title="Curva ' + c + ' no período">' + c + "</span>" : '<span style="color:var(--muted)" title="Sem venda no período">—</span>'; }
+
   /* ---------- cálculo ---------- */
   function linhas() {
     var pm = qtdPedida(), out = [];
     Object.keys(window.REPO).forEach(function (arq) {
       var D = window.REPO[arq], d3 = Math.max(1, D.dias3), d30 = Math.max(1, D.dias30);
       D.rows.forEach(function (r) {
-        var dem = P.base === "3m" ? (r[3] + r[4] + r[5]) / d3 : P.base === "dia" ? r[9] : P.base === "sem" ? r[10] / Math.max(1, D.dias_sem) : r[8] / d30;
+        var ln = nrm(D.loja), pq = PER ? PER.q[ln + "|" + r[0]] || 0 : 0;
+        var dem = P.base === "per" ? (PER ? pq / Math.max(1, PER.dias) : 0) : P.base === "3m" ? (r[3] + r[4] + r[5]) / d3 : P.base === "dia" ? r[9] : P.base === "sem" ? r[10] / Math.max(1, D.dias_sem) : r[8] / d30;
         var pedq = pm[D.loja + "|" + r[0]] || 0, saldo = r[2];
         var alvo = dem * (P.dias + P.lead), sug = dem > 0 ? Math.max(0, Math.ceil(alvo - (Math.max(saldo, 0) + pedq) - 1e-9)) : 0;
-        out.push({ k: r[0], desc: r[1], loja: D.loja, saldo: saldo, marca: r[11] || "", m: [r[3], r[4], r[5]], dsv: r[6], ult: r[7], dem: dem, ped: pedq, sug: sug, cob: dem > 0 && saldo > 0 ? saldo / dem : null });
+        out.push({ abc: PER ? PER.abc[ln + "|" + r[0]] || "" : null, k: r[0], desc: r[1], loja: D.loja, saldo: saldo, marca: r[11] || "", m: [r[3], r[4], r[5]], dsv: r[6], ult: r[7], dem: dem, ped: pedq, sug: sug, cob: dem > 0 && saldo > 0 ? saldo / dem : null });
       });
     });
     return out;
@@ -83,7 +124,7 @@
     return '<td class="r nw"><input class="num-in" type="number" min="1" step="1" value="' + (o.sug || "") + '" data-in="' + esc(o.loja + "|" + o.k) + '" placeholder="qtd"> <button class="btn-mini" type="button" data-pedir="' + esc(o.loja) + "|" + esc(o.k) + '" data-d="' + esc(o.desc) + '">Pedir</button></td>';
   }
   function trLoja(o, comLoja) {
-    return "<tr><td>" + esc(o.k) + "</td><td>" + esc(o.desc) + "</td><td>" + esc(o.marca) + "</td>" + (comLoja ? "<td>" + esc(o.loja) + "</td>" : "") +
+    return "<tr><td>" + esc(o.k) + "</td><td>" + esc(o.desc) + "</td><td>" + esc(o.marca) + "</td><td>" + badgeAbc(o.abc) + "</td>" + (comLoja ? "<td>" + esc(o.loja) + "</td>" : "") +
       '<td class="r">' + N0.format(o.saldo) + '</td><td class="r">' + N0.format(o.m[0]) + '</td><td class="r">' + N0.format(o.m[1]) + '</td><td class="r">' + N0.format(o.m[2]) + '</td><td class="r">' + (o.dsv == null ? "—" : N0.format(o.dsv) + " d") +
       '</td><td class="r">' + (o.cob == null ? "—" : N1.format(o.cob) + " d") + '</td><td class="r">' + (o.ped ? '<span class="st st-E">' + N0.format(o.ped) + "</span>" : "—") + '</td><td class="r">' + (o.sug ? "<b>" + N0.format(o.sug) + "</b>" : "—") + '</td><td class="r">' + dt(o.ult) + "</td>" + celPedir(o) + "</tr>";
   }
@@ -96,15 +137,20 @@
     $("rcDias").value = P.dias; $("rcLead").value = P.lead; $("rcBase").value = P.base;
     if (!carregar(function () { App.render(); })) {
       setHTML("rcAviso", carga.erro ? '<div class="aviso-box">Arquivos de reposição não encontrados — rode <b>abrir_analises.bat</b> para gerá-los.</div>' : "");
-      setHTML("rcTab", '<tr><td colspan="14">' + (carga.erro ? "Sem dados." : "Carregando…") + "</td></tr>"); return;
+      setHTML("rcTab", '<tr><td colspan="15">' + (carga.erro ? "Sem dados." : "Carregando…") + "</td></tr>"); return;
     }
-    setHTML("rcAviso", "");
+    var pronto = perPronto();
+    $("rcDe").value = P.de || ""; $("rcAte").value = P.ate || ""; $("rcAbc").value = R.abc;
+    var dd = datasAbc(); if (dd.length) { $("rcDe").min = $("rcAte").min = dd[0]; $("rcDe").max = $("rcAte").max = dd[dd.length - 1]; }
+    if (P.base === "per" && !pronto) { setHTML("rcAviso", ""); setHTML("rcTab", '<tr><td colspan="15">Carregando vendas do período…</td></tr>'); return; }
+    setHTML("rcAviso", dd.length ? "" : '<div class="aviso-box">Sem histórico de vendas por dia para calcular a curva ABC.</div>');
     var todas = linhas(), q = R.q.toLowerCase();
     var marcas = {}; todas.forEach(function (o) { if (o.marca) marcas[o.marca] = 1; });
     var mo = '<option value="">TODAS AS MARCAS</option>' + Object.keys(marcas).sort(function (a, b) { return a.localeCompare(b, "pt-BR"); }).map(function (m) { return '<option value="' + esc(m) + '">' + esc(m) + "</option>"; }).join("");
     var sm = $("rcMarca"); if (sm._o !== mo) { sm._o = mo; sm.innerHTML = mo; sm.value = R.marca; }
     sm.style.display = Object.keys(marcas).length ? "" : "none";
     var base = todas.filter(function (o) { return (!R.loja || o.loja === R.loja) && (!R.marca || o.marca === R.marca) && (!q || o.desc.toLowerCase().indexOf(q) >= 0 || o.k.toLowerCase().indexOf(q) >= 0); });
+    if (R.visao === "lp" && R.abc) base = base.filter(function (o) { return R.abc === "-" ? !o.abc : o.abc === R.abc; });
     var precisa = base.filter(function (o) { return o.sug > 0; });
     var prods = {}; precisa.forEach(function (o) { prods[o.k] = 1; });
     var unPed = 0; base.forEach(function (o) { unPed += o.ped; });
@@ -114,38 +160,39 @@
     var mc = cabMeses(), h;
     if (R.visao === "lp") {
       var rows = (R.so ? precisa : base).slice().sort(ORD[R.ord]), lim = rows.slice(0, R.lim), com = !R.loja;
-      h = '<tr><th>Cód.</th><th>Descrição</th><th>Marca</th>' + (com ? "<th>Loja</th>" : "") + '<th class="r">Saldo em loja</th><th class="r">' + mc[0] + '</th><th class="r">' + mc[1] + '</th><th class="r">' + mc[2] + '</th><th class="r">Dias sem vendas</th><th class="r">Cobertura</th><th class="r">Em pedido</th><th class="r">Sugestão de reposição</th><th class="r">Última venda</th><th class="r">Pedido</th></tr>';
+      h = '<tr><th>Cód.</th><th>Descrição</th><th>Marca</th><th title="Curva ABC da loja no período (por faturamento)">ABC</th>' + (com ? "<th>Loja</th>" : "") + '<th class="r">Saldo em loja</th><th class="r">' + mc[0] + '</th><th class="r">' + mc[1] + '</th><th class="r">' + mc[2] + '</th><th class="r">Dias sem vendas</th><th class="r">Cobertura</th><th class="r">Em pedido</th><th class="r">Sugestão de reposição</th><th class="r">Última venda</th><th class="r">Pedido</th></tr>';
       setHTML("rcHead", h);
-      setHTML("rcTab", lim.map(function (o) { return trLoja(o, com); }).join("") || '<tr><td colspan="14">Nenhum produto neste filtro.</td></tr>');
+      setHTML("rcTab", lim.map(function (o) { return trLoja(o, com); }).join("") || '<tr><td colspan="15">Nenhum produto neste filtro.</td></tr>');
       setTxt("rcTitulo", (R.loja || "Todas as lojas") + " — " + N0.format(rows.length) + " linha(s)");
       $("rcMais").style.display = rows.length > lim.length ? "" : "none";
       setTxt("rcNota", "Mostrando " + N0.format(lim.length) + " de " + N0.format(rows.length) + ".");
       $("rcCsv")._rows = rows;
     } else {
       var g = {};
-      base.forEach(function (o) { var x = g[o.k] = g[o.k] || { k: o.k, desc: o.desc, saldo: 0, m: [0, 0, 0], dsv: null, ult: "", ped: 0, sug: 0, dem: 0, sp: 0, marca: o.marca, lojas: [] }; x.saldo += o.saldo; x.dem += o.dem; x.sp += Math.max(o.saldo, 0); for (var i = 0; i < 3; i++) x.m[i] += o.m[i];
+      base.forEach(function (o) { var x = g[o.k] = g[o.k] || { k: o.k, desc: o.desc, saldo: 0, m: [0, 0, 0], dsv: null, ult: "", ped: 0, sug: 0, dem: 0, sp: 0, marca: o.marca, abc: PER ? PER.rede[o.k] || "" : null, lojas: [] }; x.saldo += o.saldo; x.dem += o.dem; x.sp += Math.max(o.saldo, 0); for (var i = 0; i < 3; i++) x.m[i] += o.m[i];
         if (o.dsv != null && (x.dsv == null || o.dsv < x.dsv)) { x.dsv = o.dsv; } if (o.ult > x.ult) x.ult = o.ult; x.ped += o.ped; x.sug += o.sug; x.lojas.push(o); });
       var arr = Object.keys(g).map(function (k) { g[k].nlojas = g[k].lojas.filter(function (o) { return o.sug > 0; }).length; return g[k]; });
       if (R.so) arr = arr.filter(function (x) { return x.sug > 0; });
+      if (R.abc) arr = arr.filter(function (x) { return R.abc === "-" ? !x.abc : x.abc === R.abc; });
       arr.sort(ORD[R.ord]);
       var lim2 = arr.slice(0, R.lim);
-      setHTML("rcHead", '<tr><th></th><th>Cód.</th><th>Descrição</th><th>Marca</th><th class="r">Saldo (rede)</th><th class="r">' + mc[0] + '</th><th class="r">' + mc[1] + '</th><th class="r">' + mc[2] + '</th><th class="r">Dias sem vendas</th><th class="r">Cobertura</th><th class="r">Em pedido</th><th class="r">Sugestão total</th><th class="r">Lojas que precisam</th><th class="r">Última venda</th></tr>');
+      setHTML("rcHead", '<tr><th></th><th>Cód.</th><th>Descrição</th><th>Marca</th><th title="Curva ABC da rede no período">ABC</th><th class="r">Saldo (rede)</th><th class="r">' + mc[0] + '</th><th class="r">' + mc[1] + '</th><th class="r">' + mc[2] + '</th><th class="r">Dias sem vendas</th><th class="r">Cobertura</th><th class="r">Em pedido</th><th class="r">Sugestão total</th><th class="r">Lojas que precisam</th><th class="r">Última venda</th></tr>');
       setHTML("rcTab", lim2.map(function (x) {
-        var aberto = R.exp[x.k], s = '<tr class="lnk" data-exp="' + esc(x.k) + '"><td>' + (aberto ? "▾" : "▸") + "</td><td>" + esc(x.k) + "</td><td>" + esc(x.desc) + "</td><td>" + esc(x.marca) + '</td><td class="r">' + N0.format(x.saldo) + '</td><td class="r">' + N0.format(x.m[0]) + '</td><td class="r">' + N0.format(x.m[1]) + '</td><td class="r">' + N0.format(x.m[2]) + '</td><td class="r">' + (x.dsv == null ? "—" : N0.format(x.dsv) + " d") + '</td><td class="r">' + (x.dem > 0 && x.sp > 0 ? N1.format(x.sp / x.dem) + " d" : "—") + '</td><td class="r">' + (x.ped ? N0.format(x.ped) : "—") + '</td><td class="r">' + (x.sug ? "<b>" + N0.format(x.sug) + "</b>" : "—") + '</td><td class="r">' + x.nlojas + " de " + x.lojas.length + '</td><td class="r">' + dt(x.ult) + "</td></tr>";
+        var aberto = R.exp[x.k], s = '<tr class="lnk" data-exp="' + esc(x.k) + '"><td>' + (aberto ? "▾" : "▸") + "</td><td>" + esc(x.k) + "</td><td>" + esc(x.desc) + "</td><td>" + esc(x.marca) + "</td><td>" + badgeAbc(x.abc) + '</td><td class="r">' + N0.format(x.saldo) + '</td><td class="r">' + N0.format(x.m[0]) + '</td><td class="r">' + N0.format(x.m[1]) + '</td><td class="r">' + N0.format(x.m[2]) + '</td><td class="r">' + (x.dsv == null ? "—" : N0.format(x.dsv) + " d") + '</td><td class="r">' + (x.dem > 0 && x.sp > 0 ? N1.format(x.sp / x.dem) + " d" : "—") + '</td><td class="r">' + (x.ped ? N0.format(x.ped) : "—") + '</td><td class="r">' + (x.sug ? "<b>" + N0.format(x.sug) + "</b>" : "—") + '</td><td class="r">' + x.nlojas + " de " + x.lojas.length + '</td><td class="r">' + dt(x.ult) + "</td></tr>";
         if (aberto) {
-          s += '<tr class="subtab"><td></td><td colspan="13"><table class="table table--data"><thead><tr><th>Loja</th><th class="r">Saldo</th><th class="r">' + mc[0] + '</th><th class="r">' + mc[1] + '</th><th class="r">' + mc[2] + '</th><th class="r">Dias s/ vendas</th><th class="r">Cobertura</th><th class="r">Em pedido</th><th class="r">Sugestão</th><th class="r">Última venda</th><th class="r">Pedido</th></tr></thead><tbody>' +
+          s += '<tr class="subtab"><td></td><td colspan="14"><table class="table table--data"><thead><tr><th>Loja</th><th>ABC</th><th class="r">Saldo</th><th class="r">' + mc[0] + '</th><th class="r">' + mc[1] + '</th><th class="r">' + mc[2] + '</th><th class="r">Dias s/ vendas</th><th class="r">Cobertura</th><th class="r">Em pedido</th><th class="r">Sugestão</th><th class="r">Última venda</th><th class="r">Pedido</th></tr></thead><tbody>' +
             x.lojas.slice().sort(function (a, b) { return b.sug - a.sug; }).filter(function (o) { return !R.so || o.sug > 0; }).map(function (o) {
-              return "<tr><td>" + esc(o.loja) + '</td><td class="r">' + N0.format(o.saldo) + '</td><td class="r">' + N0.format(o.m[0]) + '</td><td class="r">' + N0.format(o.m[1]) + '</td><td class="r">' + N0.format(o.m[2]) + '</td><td class="r">' + (o.dsv == null ? "—" : N0.format(o.dsv) + " d") + '</td><td class="r">' + (o.cob == null ? "—" : N1.format(o.cob) + " d") + '</td><td class="r">' + (o.ped ? N0.format(o.ped) : "—") + '</td><td class="r">' + (o.sug ? "<b>" + N0.format(o.sug) + "</b>" : "—") + '</td><td class="r">' + dt(o.ult) + "</td>" + celPedir(o) + "</tr>";
+              return "<tr><td>" + esc(o.loja) + "</td><td>" + badgeAbc(o.abc) + '</td><td class="r">' + N0.format(o.saldo) + '</td><td class="r">' + N0.format(o.m[0]) + '</td><td class="r">' + N0.format(o.m[1]) + '</td><td class="r">' + N0.format(o.m[2]) + '</td><td class="r">' + (o.dsv == null ? "—" : N0.format(o.dsv) + " d") + '</td><td class="r">' + (o.cob == null ? "—" : N1.format(o.cob) + " d") + '</td><td class="r">' + (o.ped ? N0.format(o.ped) : "—") + '</td><td class="r">' + (o.sug ? "<b>" + N0.format(o.sug) + "</b>" : "—") + '</td><td class="r">' + dt(o.ult) + "</td>" + celPedir(o) + "</tr>";
             }).join("") + "</tbody></table></td></tr>";
         }
         return s;
-      }).join("") || '<tr><td colspan="14">Nenhum produto neste filtro.</td></tr>');
+      }).join("") || '<tr><td colspan="15">Nenhum produto neste filtro.</td></tr>');
       setTxt("rcTitulo", "Por produto (rede) — " + N0.format(arr.length) + " produto(s) · clique na linha para ver as lojas");
       $("rcMais").style.display = arr.length > lim2.length ? "" : "none";
       setTxt("rcNota", "Mostrando " + N0.format(lim2.length) + " de " + N0.format(arr.length) + ".");
       $("rcCsv")._rows = null; $("rcCsv")._arr = arr;
     }
-    setTxt("rcFormula", "Sugestão = demanda diária × (dias de reposição + lead time) − saldo em loja − quantidade em pedidos ativos (arredondada para cima). Demanda diária = " + ({ "3m": "vendas dos 3 meses ÷ dias com dados", dia: "vendas do dia atual", sem: "vendas da semana atual (segunda até hoje) ÷ dias decorridos" }[P.base] || "vendas dos últimos 30 dias ÷ dias com dados") + ". Hoje: " + P.dias + " + " + P.lead + " = " + (P.dias + P.lead) + " dias de cobertura.");
+    setTxt("rcFormula", "Sugestão = demanda diária × (dias de reposição + lead time) − saldo em loja − quantidade em pedidos ativos (arredondada para cima). Demanda diária = " + ({ "3m": "vendas dos 3 meses ÷ dias com dados", dia: "vendas do dia atual", sem: "vendas da semana atual (segunda até hoje) ÷ dias decorridos", per: "vendas de " + dt(P.de) + " a " + dt(P.ate) + " ÷ dias com dados no período" }[P.base] || "vendas dos últimos 30 dias ÷ dias com dados") + ". Hoje: " + P.dias + " + " + P.lead + " = " + (P.dias + P.lead) + " dias de cobertura. Curva ABC = classe da loja (rede, na visão por produto) pelo faturamento de " + dt(P.de) + " a " + dt(P.ate) + ": A até 80% do faturamento, B até 95%, C o restante; “—” = sem venda no período.");
     document.querySelectorAll("#rcLoja,#rcBase").forEach(function () { });
     [].forEach.call($("rcVisao").children, function (b) { b.classList.toggle("is-active", b.getAttribute("data-v") === R.visao); });
     [].forEach.call($("rcSo").children, function (b) { b.classList.toggle("is-active", (b.getAttribute("data-s") === "1") === R.so); });
@@ -175,6 +222,8 @@
       setHTML("rdTab", '<tr><td colspan="11">' + (carga.erro ? "Sem dados." : "Carregando…") + "</td></tr>"); return;
     }
     setHTML("rdAviso", "");
+    var prontoRd = perPronto();
+    if (P.base === "per" && !prontoRd) { setHTML("rdTab", '<tr><td colspan="11">Carregando vendas do período…</td></tr>'); return; }
     var todas = linhas(), porK = {};
     todas.forEach(function (o) { (porK[o.k] = porK[o.k] || []).push(o); });
     var res = [];
@@ -259,6 +308,9 @@
     var par = function () { var d = parseFloat($("rcDias").value), l = parseFloat($("rcLead").value); P.dias = d >= 0 ? d : 0; P.lead = l >= 0 ? l : 0; P.base = $("rcBase").value; gravarLS("nms_repo_params", P); rep(); };
     ["rcDias", "rcLead"].forEach(function (id) { $(id).addEventListener("change", par); });
     $("rcBase").addEventListener("change", par);
+    var parPer = function () { if ($("rcDe").value) P.de = $("rcDe").value; if ($("rcAte").value) P.ate = $("rcAte").value; if (P.de > P.ate) { var t = P.de; P.de = P.ate; P.ate = t; } gravarLS("nms_repo_params", P); rep(); };
+    $("rcDe").addEventListener("change", parPer); $("rcAte").addEventListener("change", parPer);
+    $("rcAbc").addEventListener("change", function (e) { R.abc = e.target.value; R.lim = 200; rep(); });
     $("rcTab").addEventListener("click", function (e) {
       var b = e.target.closest("button[data-pedir]");
       if (b) { var ch = b.getAttribute("data-pedir"), i = ch.indexOf("|"), loja = ch.slice(0, i), k = ch.slice(i + 1), inp = b.parentNode.querySelector("input"); if (pedir(loja, k, b.getAttribute("data-d"), inp.value)) rep(); else inp.focus(); return; }
@@ -267,8 +319,8 @@
     });
     $("rcCsv").addEventListener("click", function () {
       var mc = cabMeses(), bt = $("rcCsv");
-      if (R.visao === "lp" && bt._rows) csvBaixar("reposicao_curva.csv", ["Cód.", "Descrição", "Loja", "Marca", "Saldo em loja", mc[0], mc[1], mc[2], "Dias sem vendas", "Cobertura (dias)", "Em pedido", "Sugestão de reposição", "Última venda"], bt._rows.map(function (o) { return [o.k, o.desc, o.loja, o.marca, o.saldo, o.m[0], o.m[1], o.m[2], o.dsv == null ? "" : o.dsv, o.cob == null ? "" : Math.round(o.cob * 10) / 10, o.ped, o.sug, o.ult]; }));
-      else if (bt._arr) csvBaixar("reposicao_por_produto.csv", ["Cód.", "Descrição", "Saldo (rede)", mc[0], mc[1], mc[2], "Dias sem vendas", "Em pedido", "Sugestão total", "Lojas que precisam", "Última venda"], bt._arr.map(function (x) { return [x.k, x.desc, x.saldo, x.m[0], x.m[1], x.m[2], x.dsv == null ? "" : x.dsv, x.ped, x.sug, x.nlojas, x.ult]; }));
+      if (R.visao === "lp" && bt._rows) csvBaixar("reposicao_curva.csv", ["Cód.", "Descrição", "Loja", "Marca", "Curva ABC", "Saldo em loja", mc[0], mc[1], mc[2], "Dias sem vendas", "Cobertura (dias)", "Em pedido", "Sugestão de reposição", "Última venda"], bt._rows.map(function (o) { return [o.k, o.desc, o.loja, o.marca, o.abc || "", o.saldo, o.m[0], o.m[1], o.m[2], o.dsv == null ? "" : o.dsv, o.cob == null ? "" : Math.round(o.cob * 10) / 10, o.ped, o.sug, o.ult]; }));
+      else if (bt._arr) csvBaixar("reposicao_por_produto.csv", ["Cód.", "Descrição", "Curva ABC (rede)", "Saldo (rede)", mc[0], mc[1], mc[2], "Dias sem vendas", "Em pedido", "Sugestão total", "Lojas que precisam", "Última venda"], bt._arr.map(function (x) { return [x.k, x.desc, x.abc || "", x.saldo, x.m[0], x.m[1], x.m[2], x.dsv == null ? "" : x.dsv, x.ped, x.sug, x.nlojas, x.ult]; }));
     });
 
     /* redistribuição */
